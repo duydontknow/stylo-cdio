@@ -1,16 +1,31 @@
-# React + Vite
+# 👕 STYLO - Trợ lý Thời trang AI (AI Wardrobe Stylist)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Ứng dụng quản lý tủ đồ và gợi ý phối trang phục thông minh dựa trên thời tiết và GenAI (Google Gemini).
 
-Currently, two official plugins are available:
+## 🚀 Hướng dẫn cài đặt và chạy dự án (Local Setup)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Yêu cầu môi trường: Đã cài đặt **Node.js** (phiên bản 18+).
 
-## React Compiler
+**Bước 1: Clone dự án về máy**
+\`\`\`
+git clone https://github.com/duydontknow/stylo-cdio.git  |
+cd stylo-cdio
+\`\`\`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Bước 2: Cài đặt các thư viện phụ thuộc (Dependencies)**
+\`\`\`
+npm install
+\`\`\`
 
-## Expanding the ESLint configuration
+**Bước 3: Thiết lập Biến môi trường (Environment Variables)**
+1. Copy file `.env.example` và đổi tên bản sao thành `.env`.
+2. Mở file `.env` và điền các khóa API (API Keys):
+   - `VITE_SUPABASE_URL` & `VITE_SUPABASE_ANON_KEY`: Lấy từ Supabase.
+   - `VITE_GEMINI_API_KEY`: Lấy từ Google AI Studio.
+   - `VITE_WEATHER_API_KEY`: Lấy từ OpenWeatherMap.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Bước 4: Khởi chạy ứng dụng**
+\`\`\`
+npm run dev
+\`\`\`
+Mở trình duyệt và truy cập vào đường dẫn: `http://localhost:5173`
