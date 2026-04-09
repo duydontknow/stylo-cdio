@@ -1,5 +1,6 @@
 // src/services/clothes.js
 import { supabase } from "./supabase";
+import { processBackgroundRemoval } from "../utils/removeBg";
 
 // Lấy danh sách danh mục (để đưa vào dropdown chọn loại áo)
 export const getCategories = async () => {
@@ -28,14 +29,21 @@ export const getUserClothes = async (userId) => {
 // Hàm tải ảnh lên Storage và lưu thông tin vào Database
 export const addCloth = async (file, clothData) => {
     try {
+        // Thực hiện xóa phông trước khi upload (nếu có API Key)
+        const { file: processedFile, error: bgError } = await processBackgroundRemoval(file);
+
+        if (bgError) {
+            console.warn("Background removal failed, uploading original file.", bgError);
+        }
+
         // 1. Tạo tên file ngẫu nhiên để không bị trùng
-        const fileExt = file.name.split(".").pop();
+        const fileExt = processedFile.name.split(".").pop() || "png";
         const fileName = `${clothData.user_id}-${Math.random()}.${fileExt}`;
 
         // 2. Upload file ảnh lên bucket 'clothes'
         const { error: uploadError } = await supabase.storage
             .from("clothes")
-            .upload(fileName, file);
+            .upload(fileName, processedFile);
 
         if (uploadError) throw uploadError;
 

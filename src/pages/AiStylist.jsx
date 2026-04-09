@@ -7,12 +7,13 @@ import toast from "react-hot-toast";
 import { useWeather } from "../hooks/useWeather";
 import {
     Sparkles,
-    Thermometer,
     Briefcase,
     Coffee,
     Heart,
     Loader2,
     CheckCircle,
+    Wand2,
+    Target
 } from "lucide-react";
 import { getProfile } from "../services/profile";
 
@@ -24,6 +25,10 @@ export default function AiStylist() {
     const [isGenerating, setIsGenerating] = useState(false);
     const { weather } = useWeather();
     const [profile, setProfile] = useState(null);
+
+    // AI Form states
+    const [customContext, setCustomContext] = useState("");
+    const [selectedStyle, setSelectedStyle] = useState("Bất kỳ");
 
     useEffect(() => {
         async function loadData() {
@@ -38,25 +43,29 @@ export default function AiStylist() {
         loadData();
     }, [user.id]);
 
-    const handleGenerate = async (context) => {
+    const handleGenerate = async (contextStr) => {
+        if (!contextStr) {
+            return toast.error("Vui lòng nhập trường hợp bạn muốn phối đồ!");
+        }
+
         setIsGenerating(true);
+        setSuggestedOutfits([]); // Xoá kết quả cũ
+
         try {
-            // Bây giờ AI thực sự đang làm việc!
             const results = await suggestOutfitsWithLLM(
                 wardrobe,
                 weather?.temp || 28,
-                context,
+                { context: contextStr, style: selectedStyle },
                 profile,
             );
+
             if (results.length > 0) {
                 setSuggestedOutfits(results);
             } else {
-                alert(
-                    "AI đang bận hoặc tủ đồ của bạn chưa đủ đa dạng. Hãy thử lại!",
-                );
+                toast.error("AI không tìm thấy cách phối hợp lý. Vui lòng thêm đồ vào tủ!");
             }
         } catch (error) {
-            alert("Có lỗi khi kết nối với AI!");
+            toast.error("Có lỗi khi kết nối với AI!");
         } finally {
             setIsGenerating(false);
         }
@@ -81,109 +90,164 @@ export default function AiStylist() {
         );
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-8 px-4 md:px-0">
             <div className="text-center">
                 <h1 className="text-3xl font-bold flex items-center justify-center gap-2">
-                    <Sparkles className="text-purple-500" /> AI Stylist
+                    <Sparkles className="text-purple-500" /> AI Stylist Chuyên Nghiệp
                 </h1>
                 <p className="text-gray-500 mt-2">
-                    Để AI giúp bạn chọn bộ đồ hoàn hảo cho hôm nay
+                    Cố vấn phong cách AI sẽ giúp bạn thu hút mọi ánh nhìn
                 </p>
             </div>
 
-            {/* Chọn bối cảnh */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                    {
-                        id: "Work",
-                        name: "Đi làm",
-                        icon: Briefcase,
-                        color: "bg-blue-500",
-                    },
-                    {
-                        id: "Casual",
-                        name: "Đi chơi",
-                        icon: Coffee,
-                        color: "bg-green-500",
-                    },
-                    {
-                        id: "Date",
-                        name: "Hẹn hò",
-                        icon: Heart,
-                        color: "bg-red-500",
-                    },
-                ].map((ctx) => (
-                    <button
-                        key={ctx.id}
-                        onClick={() => handleGenerate(ctx.name)}
-                        disabled={isGenerating}
-                        className="flex flex-col items-center p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group"
-                    >
-                        <div
-                            className={`w-12 h-12 ${ctx.color} text-white rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}
+            {/* Vùng điều khiển AI */}
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+                
+                {/* 1. Nút chọn nhanh */}
+                <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-3">Chọn nhanh ngữ cảnh:</label>
+                    <div className="grid grid-cols-3 gap-3 md:gap-4">
+                        {[
+                            { id: "Work", name: "Đi làm", icon: Briefcase, color: "bg-blue-500" },
+                            { id: "Casual", name: "Dạo phố", icon: Coffee, color: "bg-green-500" },
+                            { id: "Date", name: "Hẹn hò", icon: Heart, color: "bg-red-500" },
+                        ].map((ctx) => (
+                            <button
+                                key={ctx.id}
+                                onClick={() => {
+                                    setCustomContext(ctx.name);
+                                    handleGenerate(ctx.name);
+                                }}
+                                disabled={isGenerating}
+                                className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 p-3 md:p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors border border-gray-200"
+                            >
+                                <div className={`w-8 h-8 md:w-10 md:h-10 ${ctx.color} text-white rounded-full flex items-center justify-center shadow-md`}>
+                                    <ctx.icon size={18} className="md:w-5 md:h-5" />
+                                </div>
+                                <span className="font-semibold text-gray-800 text-sm md:text-base">{ctx.name}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="relative flex items-center py-2">
+                    <div className="flex-grow border-t border-gray-200"></div>
+                    <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">Hoặc tự yêu cầu chi tiết</span>
+                    <div className="flex-grow border-t border-gray-200"></div>
+                </div>
+
+                {/* 2. Custom Prompt + Phong cách */}
+                <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1">
+                        <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-1">
+                            <Target size={16} /> Ngữ cảnh cụ thể
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="VD: Đi dự tiệc sinh nhật ở nhà hàng sang trọng lúc 7h tối..."
+                            value={customContext}
+                            onChange={(e) => setCustomContext(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleGenerate(customContext)}
+                            className="w-full p-4 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
+                        />
+                    </div>
+                    <div className="w-full md:w-64">
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Phong cách (Style)</label>
+                        <select
+                            value={selectedStyle}
+                            onChange={(e) => setSelectedStyle(e.target.value)}
+                            className="w-full p-4 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                         >
-                            <ctx.icon size={24} />
-                        </div>
-                        <span className="font-semibold text-gray-900">
-                            {ctx.name}
-                        </span>
-                    </button>
-                ))}
+                            <option value="Bất kỳ">Bất kỳ phong cách nào</option>
+                            <option value="Minimalist (Tối giản)">Minimalist (Tối giản)</option>
+                            <option value="Streetwear (Đường phố)">Streetwear (Đường phố)</option>
+                            <option value="Vintage (Cổ điển)">Vintage (Cổ điển)</option>
+                            <option value="Hàn Quốc (Thanh lịch)">Hàn Quốc (Thanh lịch)</option>
+                            <option value="Y2K (Phá cách)">Y2K (Phá cách)</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Nút bấm AI */}
+                <button
+                    onClick={() => handleGenerate(customContext)}
+                    disabled={isGenerating || !customContext.trim()}
+                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-purple-500/30"
+                >
+                    {isGenerating ? (
+                        <>
+                            <Loader2 className="animate-spin" size={24} /> AI Đang tư duy...
+                        </>
+                    ) : (
+                        <>
+                            <Wand2 size={24} /> Bắt đầu phối đồ
+                        </>
+                    )}
+                </button>
             </div>
 
-            {/* Hiển thị kết quả AI */}
+            {/* Loaders */}
             {isGenerating && (
                 <div className="text-center py-10">
-                    <Loader2
-                        className="animate-spin mx-auto mb-4 text-purple-500"
-                        size={40}
-                    />
-                    <p className="text-gray-600 animate-pulse">
-                        AI đang phân tích tủ đồ của bạn...
+                    <div className="relative w-20 h-20 mx-auto mb-4">
+                        <div className="absolute inset-0 border-4 border-purple-200 rounded-full"></div>
+                        <div className="absolute inset-0 border-4 border-purple-500 rounded-full border-t-transparent animate-spin"></div>
+                        <Sparkles className="absolute inset-0 m-auto text-purple-500 animate-pulse" size={28} />
+                    </div>
+                    <p className="text-gray-600 font-medium animate-pulse">
+                        Đang phân tích {wardrobe.length} món đồ trong tủ...
                     </p>
                 </div>
             )}
 
+            {/* Hiển thị kết quả AI */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {!isGenerating &&
                     suggestedOutfits.map((outfit, idx) => (
                         <div
                             key={idx}
-                            className="bg-white rounded-3xl p-6 border-2 border-purple-100 shadow-xl relative overflow-hidden"
+                            className="bg-white rounded-3xl p-6 border-2 border-purple-100 shadow-xl relative overflow-hidden group hover:-translate-y-1 transition-transform"
                         >
-                            <div className="absolute top-0 right-0 bg-purple-500 text-white px-4 py-1 rounded-bl-2xl text-xs font-bold">
+                            <div className="absolute top-0 right-0 bg-purple-500 text-white px-4 py-1.5 rounded-bl-2xl text-xs font-bold z-10">
                                 GỢI Ý #{idx + 1}
                             </div>
 
-                            <h3 className="font-bold text-xl mb-4">
+                            <h3 className="font-bold text-xl mb-4 pr-16 bg-gradient-to-r from-purple-700 to-indigo-700 bg-clip-text text-transparent">
                                 {outfit.name}
                             </h3>
 
-                            <div className="flex gap-4 mb-6">
+                            <div className="flex flex-wrap gap-3 mb-6">
                                 {outfit.items.map((item) => (
-                                    <div key={item.id} className="text-center">
-                                        <img
-                                            src={item.image_url}
-                                            className="w-20 h-24 object-cover rounded-xl border border-gray-100 shadow-sm"
-                                        />
-                                        <p className="text-[10px] mt-1 text-gray-500">
-                                            {item.categories?.name}
-                                        </p>
+                                    <div key={item.id} className="text-center relative">
+                                        <div className="w-24 h-32 rounded-xl overflow-hidden shadow-md border border-gray-100 bg-gray-50">
+                                            <img
+                                                src={item.image_url}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="absolute -bottom-2 -left-2 bg-white flex items-center justify-center p-1 rounded-full shadow-sm border border-gray-100">
+                                            <div 
+                                                className="w-4 h-4 rounded-full border border-gray-300" 
+                                                style={{backgroundColor: item.color_hex}}
+                                                title={item.color_hex}
+                                            />
+                                        </div>
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="bg-purple-50 p-4 rounded-2xl mb-4">
-                                <p className="text-sm text-purple-800 italic">
-                                    " {outfit.reason} "
+                            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-4 rounded-2xl mb-5 border border-purple-100/50 relative">
+                                <Sparkles size={16} className="absolute top-3 left-3 text-purple-400" />
+                                <p className="text-sm text-purple-900 font-medium pl-6 leading-relaxed">
+                                    "{outfit.reason}"
                                 </p>
                             </div>
 
                             <button
                                 onClick={() => saveSuggestedOutfit(outfit)}
-                                className="w-full bg-black text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors"
+                                className="w-full bg-black text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors shadow-md"
                             >
-                                <CheckCircle size={18} /> Lưu bộ đồ này
+                                <CheckCircle size={18} /> Lưu vào Bộ Sưu Tập
                             </button>
                         </div>
                     ))}

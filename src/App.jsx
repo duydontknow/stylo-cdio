@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import {
     BrowserRouter as Router,
     Routes,
@@ -7,21 +8,29 @@ import {
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./contexts/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
+import { Loader2 } from "lucide-react";
 
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
 import Layout from "./components/layout/Layout";
 
-// Import đầy đủ các trang
-import Wardrobe from "./pages/Wardrobe";
-import Outfits from "./pages/Outfits";
-import AiStylist from "./pages/AiStylist";
-import Profile from "./pages/Profile";
+// Lazy loading các trang để tối ưu Code-Splitting
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Wardrobe = lazy(() => import("./pages/Wardrobe"));
+const Outfits = lazy(() => import("./pages/Outfits"));
+const AiStylist = lazy(() => import("./pages/AiStylist"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Admin = lazy(() => import("./pages/Admin"));
+
+// Global Loader khi lazy load chunk mới
+const PageLoader = () => (
+    <div className="flex justify-center items-center h-[80vh] w-full">
+        <Loader2 className="animate-spin text-gray-400 w-10 h-10" />
+    </div>
+);
 
 function App() {
     return (
         <AuthProvider>
-            {/* Thêm Toaster ở đây */}
             <Toaster position="top-right" reverseOrder={false} />
 
             <Router>
@@ -37,11 +46,54 @@ function App() {
                             </ProtectedRoute>
                         }
                     >
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/wardrobe" element={<Wardrobe />} />
-                        <Route path="/outfits" element={<Outfits />} />
-                        <Route path="/ai-stylist" element={<AiStylist />} />
-                        <Route path="/profile" element={<Profile />} />
+                        <Route
+                            path="/dashboard"
+                            element={
+                                <Suspense fallback={<PageLoader />}>
+                                    <Dashboard />
+                                </Suspense>
+                            }
+                        />
+                        <Route
+                            path="/wardrobe"
+                            element={
+                                <Suspense fallback={<PageLoader />}>
+                                    <Wardrobe />
+                                </Suspense>
+                            }
+                        />
+                        <Route
+                            path="/outfits"
+                            element={
+                                <Suspense fallback={<PageLoader />}>
+                                    <Outfits />
+                                </Suspense>
+                            }
+                        />
+                        <Route
+                            path="/ai-stylist"
+                            element={
+                                <Suspense fallback={<PageLoader />}>
+                                    <AiStylist />
+                                </Suspense>
+                            }
+                        />
+                        <Route
+                            path="/profile"
+                            element={
+                                <Suspense fallback={<PageLoader />}>
+                                    <Profile />
+                                </Suspense>
+                            }
+                        />
+                        <Route
+                            path="/admin"
+                            element={
+                                <Suspense fallback={<PageLoader />}>
+                                    <Admin />
+                                </Suspense>
+                            }
+                        />
                     </Route>
 
                     {/* Fallback */}

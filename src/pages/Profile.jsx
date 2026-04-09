@@ -10,6 +10,7 @@ import {
     Palette,
     Loader2,
     Save,
+    Edit2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -17,6 +18,7 @@ export default function Profile() {
     const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
 
     const [formData, setFormData] = useState({
         height: "",
@@ -28,13 +30,16 @@ export default function Profile() {
     useEffect(() => {
         async function loadProfile() {
             const data = await getProfile(user.id);
-            if (data) {
+            if (data && (data.height || data.weight || data.body_shape || data.skin_tone)) {
                 setFormData({
                     height: data.height || "",
                     weight: data.weight || "",
                     body_shape: data.body_shape || "",
                     skin_tone: data.skin_tone || "",
                 });
+                setIsEditing(false);
+            } else {
+                setIsEditing(true);
             }
             setLoading(false);
         }
@@ -53,6 +58,7 @@ export default function Profile() {
                 skin_tone: formData.skin_tone,
             });
             toast.success("Lưu hồ sơ thành công!", { id: toastId });
+            setIsEditing(false);
         } catch (error) {
             toast.error("Lỗi khi lưu hồ sơ!", { id: toastId });
         } finally {
@@ -98,7 +104,8 @@ export default function Profile() {
                                     height: e.target.value,
                                 })
                             }
-                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black outline-none"
+                            className={`w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black outline-none transition-colors ${!isEditing ? "bg-gray-50 text-gray-500 cursor-not-allowed" : "bg-white"}`}
+                            disabled={!isEditing}
                         />
                     </div>
 
@@ -117,7 +124,8 @@ export default function Profile() {
                                     weight: e.target.value,
                                 })
                             }
-                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black outline-none"
+                            className={`w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black outline-none transition-colors ${!isEditing ? "bg-gray-50 text-gray-500 cursor-not-allowed" : "bg-white"}`}
+                            disabled={!isEditing}
                         />
                     </div>
 
@@ -134,7 +142,8 @@ export default function Profile() {
                                     body_shape: e.target.value,
                                 })
                             }
-                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black outline-none bg-white"
+                            className={`w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black outline-none transition-colors ${!isEditing ? "bg-gray-50 text-gray-500 cursor-not-allowed appearance-none" : "bg-white"}`}
+                            disabled={!isEditing}
                         >
                             <option value="">-- Chưa xác định --</option>
                             <option value="Chữ nhật">
@@ -164,7 +173,8 @@ export default function Profile() {
                                     skin_tone: e.target.value,
                                 })
                             }
-                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black outline-none bg-white"
+                            className={`w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black outline-none transition-colors ${!isEditing ? "bg-gray-50 text-gray-500 cursor-not-allowed appearance-none" : "bg-white"}`}
+                            disabled={!isEditing}
                         >
                             <option value="">-- Chưa xác định --</option>
                             <option value="Sáng (Light)">Sáng (Light)</option>
@@ -176,18 +186,37 @@ export default function Profile() {
                     </div>
                 </div>
 
-                <button
-                    type="submit"
-                    disabled={saving}
-                    className="w-full bg-black text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50"
-                >
-                    {saving ? (
-                        <Loader2 className="animate-spin" size={20} />
-                    ) : (
-                        <Save size={20} />
-                    )}
-                    Lưu thông tin
-                </button>
+                {isEditing ? (
+                    <div className="flex gap-4">
+                        <button
+                            type="button"
+                            onClick={() => setIsEditing(false)}
+                            className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold flex justify-center items-center gap-2 hover:bg-gray-200 transition-colors"
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="flex-1 bg-black text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50"
+                        >
+                            {saving ? (
+                                <Loader2 className="animate-spin" size={20} />
+                            ) : (
+                                <Save size={20} />
+                            )}
+                            Lưu thông tin
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); setIsEditing(true); }}
+                        className="w-full bg-black text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 hover:bg-gray-800 transition-colors"
+                    >
+                        <Edit2 size={20} /> Chỉnh sửa hồ sơ
+                    </button>
+                )}
             </form>
         </div>
     );

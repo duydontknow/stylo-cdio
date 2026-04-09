@@ -8,11 +8,14 @@ export default function Login() {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState(""); // Thêm state cho Xác nhận mật khẩu
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     const navigate = useNavigate();
+
+    // DANH SÁCH EMAIL ĐƯỢC CẤP QUYỀN ADMIN (Nhớ đổi thành email của mày)
+    const ADMIN_EMAILS = ["admin@gmail.com", "tuancode@gmail.com"];
 
     const handleAuth = async (e) => {
         e.preventDefault();
@@ -29,12 +32,18 @@ export default function Login() {
         try {
             if (isLogin) {
                 // Xử lý Đăng nhập
-                const { error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabase.auth.signInWithPassword({
                     email,
                     password,
                 });
                 if (error) throw error;
-                navigate("/dashboard");
+
+                // --- PHÂN QUYỀN RẼ NHÁNH TẠI ĐÂY ---
+                if (ADMIN_EMAILS.includes(data.user.email)) {
+                    navigate("/admin"); // Nếu là Admin thì vào thẳng Dashboard Admin
+                } else {
+                    navigate("/dashboard"); // Nếu là User thường thì vào trang chủ/dashboard của họ
+                }
             } else {
                 // Xử lý Đăng ký
                 const { error } = await supabase.auth.signUp({
@@ -43,6 +52,7 @@ export default function Login() {
                 });
                 if (error) throw error;
                 alert("Đăng ký thành công! Hãy đăng nhập ngay.");
+
                 // Reset form và chuyển về Đăng nhập
                 setIsLogin(true);
                 setPassword("");
