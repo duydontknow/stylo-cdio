@@ -13,8 +13,13 @@ import {
     Users,
     Shirt,
     Layout,
+    Shield,
+    Database
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
+import Button from "../components/common/Button";
+import Input from "../components/common/Input";
 
 const ADMIN_EMAILS = ["admin@gmail.com", "tuancode@gmail.com"];
 
@@ -57,34 +62,57 @@ export default function Admin() {
 
     if (loading) return <AdminSkeleton />;
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0.4, staggerChildren: 0.1 } }
+    };
+    
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 }
+    };
+
     return (
-        <div className="max-w-7xl mx-auto space-y-8 pb-10 px-4 md:px-0">
+        <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+            className="max-w-7xl mx-auto space-y-8 pb-10 px-4 md:px-0"
+        >
             {/* Header Admin */}
-            <div className="bg-black text-white p-6 md:p-8 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between shadow-lg gap-4">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
+            <motion.div variants={itemVariants} className="bg-primary text-white p-8 md:p-10 rounded-[2.5rem] flex flex-col sm:flex-row items-start sm:items-center justify-between shadow-soft gap-6 relative overflow-hidden">
+                <div className="absolute -right-20 -bottom-20 opacity-10 pointer-events-none">
+                    <Shield size={250} />
+                </div>
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-ai/20 to-transparent pointer-events-none" />
+                
+                <div className="relative z-10">
+                    <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-4 tracking-tight">
                         <Settings
-                            className="text-blue-400 animate-spin-slow"
-                            size={32}
+                            className="text-ai-light animate-spin-slow"
+                            size={36}
                         />
                         Hệ thống Quản trị
                     </h1>
-                    <p className="text-gray-400 mt-2 text-sm md:text-base">
+                    <p className="text-white/70 mt-3 text-base md:text-lg font-medium">
                         Giám sát và vận hành ứng dụng STYLO
                     </p>
                 </div>
-                <div className="text-left sm:text-right bg-white/10 p-3 rounded-xl backdrop-blur-sm">
-                    <p className="font-medium text-xs md:text-sm text-gray-300">
-                        Admin Account
+                <div className="relative z-10 text-left sm:text-right bg-white/10 p-5 rounded-[1.5rem] backdrop-blur-md border border-white/20 shadow-glass w-full sm:w-auto">
+                    <p className="font-bold text-xs uppercase tracking-wider text-white/50 mb-1">
+                        Tài khoản Admin
                     </p>
-                    <p className="font-bold text-blue-300 text-sm md:text-base break-words">
-                        {user?.email}
-                    </p>
+                    <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                        <p className="font-bold text-white text-base md:text-lg break-words">
+                            {user?.email}
+                        </p>
+                    </div>
                 </div>
-            </div>
+            </motion.div>
 
             {/* THẺ THỐNG KÊ (METRICS) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <StatCard
                     icon={Users}
                     title="Tổng Người Dùng"
@@ -103,24 +131,24 @@ export default function Admin() {
                     value={stats.total_outfits}
                     colorClass="bg-green-50 text-green-600"
                 />
-            </div>
+            </motion.div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* CỘT TRÁI: FORM DANH MỤC */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col h-full sticky top-24">
-                        <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
-                            <Plus size={20} className="text-blue-500" /> Thêm loại quần áo
+                    <div className="bg-surface p-6 rounded-[2rem] shadow-glass border border-gray-100 flex flex-col h-full sticky top-24">
+                        <h2 className="text-xl font-bold text-primary mb-6 flex items-center gap-3 border-b border-gray-50 pb-4">
+                            <Plus size={24} className="text-ai" /> Thêm danh mục
                         </h2>
-                        <form onSubmit={submitCategory} className="space-y-5 flex-1">
+                        <form onSubmit={submitCategory} className="space-y-6 flex-1">
                             <div>
-                                <label className="block text-sm font-medium mb-1.5 text-gray-700">
+                                <label className="block text-sm font-bold mb-2 text-primary">
                                     Nhóm (Type)
                                 </label>
                                 <select
                                     value={newCatType}
                                     onChange={(e) => setNewCatType(e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-black bg-gray-50 transition-all hover:bg-white"
+                                    className="w-full h-12 px-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai text-primary appearance-none font-medium bg-gray-50 hover:bg-white transition-all"
                                 >
                                     <option value="Tops">Tops (Áo)</option>
                                     <option value="Bottoms">Bottoms (Quần/Váy)</option>
@@ -129,30 +157,23 @@ export default function Admin() {
                                     <option value="Khác">Khác</option>
                                 </select>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                                    Tên danh mục
-                                </label>
-                                <input
-                                    type="text"
-                                    value={newCatName}
-                                    onChange={(e) => setNewCatName(e.target.value)}
-                                    placeholder="VD: Áo thun form rộng"
-                                    className="w-full p-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-black bg-gray-50 transition-all hover:bg-white"
-                                />
-                            </div>
+                            <Input
+                                label="Tên danh mục"
+                                value={newCatName}
+                                onChange={(e) => setNewCatName(e.target.value)}
+                                placeholder="VD: Áo thun form rộng"
+                                required
+                            />
                             <div className="pt-2">
-                                <button
+                                <Button
                                     type="submit"
-                                    disabled={isSubmitting}
-                                    className="w-full bg-black text-white py-3.5 rounded-xl font-bold hover:bg-gray-800 transition-all disabled:opacity-50 flex justify-center items-center gap-2 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                                    isLoading={isSubmitting}
+                                    variant="primary"
+                                    className="w-full shadow-glow"
+                                    leftIcon={!isSubmitting && <Database size={18} />}
                                 >
-                                    {isSubmitting ? (
-                                        <Loader2 className="animate-spin" size={18} />
-                                    ) : (
-                                        "Thêm vào hệ thống"
-                                    )}
-                                </button>
+                                    Thêm vào hệ thống
+                                </Button>
                             </div>
                         </form>
                     </div>
@@ -170,7 +191,7 @@ export default function Admin() {
                         handleToggleUserStatus={handleToggleUserStatus}
                     />
                 </div>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 }

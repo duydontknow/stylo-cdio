@@ -1,61 +1,85 @@
-import { RefreshCcw, Edit, Trash2 } from "lucide-react";
+import { RefreshCcw, Edit, Trash2, Droplets } from "lucide-react";
+import { motion } from "framer-motion";
+import Badge from "../common/Badge";
 
 export function ClothCard({ item, handleToggleStatus, openEditModal, handleDelete }) {
+    const isWashing = item.status === "Washing";
+
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden group relative">
-            {/* Overlay hiển thị các nút thao tác */}
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center gap-3">
-                <div className="flex gap-3">
+        <motion.div 
+            layout
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            whileHover={{ y: -6 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="bg-surface rounded-[1.5rem] shadow-glass border border-gray-100 overflow-hidden group relative flex flex-col"
+        >
+            {/* Overlay Grid Actions (Glassmorphism) */}
+            <div className="absolute inset-0 bg-primary/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 flex flex-col items-center justify-center gap-4">
+                <div className="flex gap-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                     <button
                         onClick={() => handleToggleStatus(item.id, item.status)}
-                        title={item.status === "Clean" ? "Mang đi giặt" : "Đã giặt xong"}
-                        className="bg-white p-2 rounded-full text-gray-800 hover:scale-110 transition-transform"
+                        title={isWashing ? "Mang đi giặt" : "Đã giặt xong"}
+                        className="bg-white/90 backdrop-blur-md p-3 rounded-2xl text-primary hover:text-ai hover:scale-110 transition-all shadow-lg"
                     >
-                        <RefreshCcw size={18} />
+                        <RefreshCcw size={20} />
                     </button>
                     <button
                         onClick={() => openEditModal(item)}
                         title="Chỉnh sửa"
-                        className="bg-blue-500 p-2 rounded-full text-white hover:scale-110 transition-transform"
+                        className="bg-white/90 backdrop-blur-md p-3 rounded-2xl text-primary hover:text-blue-500 hover:scale-110 transition-all shadow-lg"
                     >
-                        <Edit size={18} />
+                        <Edit size={20} />
                     </button>
                     <button
                         onClick={() => handleDelete(item.id)}
                         title="Xóa trang phục"
-                        className="bg-red-500 p-2 rounded-full text-white hover:scale-110 transition-transform"
+                        className="bg-white/90 backdrop-blur-md p-3 rounded-2xl text-primary hover:text-red-500 hover:scale-110 transition-all shadow-lg"
                     >
-                        <Trash2 size={18} />
+                        <Trash2 size={20} />
                     </button>
                 </div>
             </div>
 
-            <div className="aspect-[3/4] bg-gray-100 relative overflow-hidden">
-                <img
-                    src={item.image_url}
-                    alt="Trang phục"
-                    className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 ${
-                        item.status === "Washing" ? "grayscale opacity-60" : ""
-                    }`}
-                />
-                {item.status === "Washing" && (
-                    <div className="absolute top-2 left-2 bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded-md">
-                        ĐANG GIẶT
-                    </div>
-                )}
+            <div className={`aspect-[3/4] bg-gray-50 relative overflow-hidden p-2`}>
+                <div className="w-full h-full rounded-2xl overflow-hidden relative">
+                    <img
+                        src={item.image_url}
+                        alt="Trang phục"
+                        className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${
+                            isWashing ? "grayscale opacity-50 mix-blend-multiply" : "mix-blend-multiply"
+                        }`}
+                    />
+                </div>
+                
+                {/* Status Badges */}
+                <div className="absolute top-4 left-4 z-0 flex flex-col gap-2">
+                    {isWashing && (
+                        <Badge variant="warning" className="shadow-sm border border-yellow-200">
+                            <Droplets size={12} className="mr-1" /> Đang giặt
+                        </Badge>
+                    )}
+                </div>
             </div>
-            <div className="p-3 flex justify-between items-center">
-                <div>
-                    <p className="font-semibold text-sm">{item.categories?.name}</p>
-                    <p className="text-[10px] text-gray-400">
-                        {item.weather_suitability}
+
+            <div className="p-4 flex items-start justify-between bg-white relative z-0">
+                <div className="flex-1 overflow-hidden pr-2">
+                    <p className="font-bold text-[15px] truncate text-primary">{item.categories?.name}</p>
+                    <p className="text-xs font-medium text-muted mt-0.5">
+                        {item.weather_suitability === 'All' ? 'Bốn mùa' : 
+                         item.weather_suitability === 'Hot' ? 'Mùa hè' : 'Mùa đông'}
                     </p>
                 </div>
-                <div
-                    className="w-5 h-5 rounded-full border border-gray-300 shadow-inner"
-                    style={{ backgroundColor: item.color_hex }}
-                ></div>
+                {/* Color Dot Indicator */}
+                <div className="bg-white p-1 rounded-full shadow-sm border border-gray-100 flex-shrink-0">
+                    <div 
+                        className="w-5 h-5 rounded-full border border-gray-200" 
+                        style={{backgroundColor: item.color_hex}}
+                        title={item.color_hex}
+                    />
+                </div>
             </div>
-        </div>
+        </motion.div>
     );
 }

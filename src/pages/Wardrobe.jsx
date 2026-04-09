@@ -4,9 +4,20 @@ import { useWardrobe } from "../hooks/useWardrobe";
 import { ClothCard } from "../components/Wardrobe/ClothCard";
 import { WardrobeSkeleton } from "../components/common/Skeletons";
 import { WardrobeEmptyState } from "../components/common/EmptyStates";
-import { Plus, Loader2, UploadCloud, X } from "lucide-react";
+import { Plus, Loader2, UploadCloud, ImageMinus } from "lucide-react";
 import toast from "react-hot-toast";
 import { fileToGenerativePart, analyzeClothingImage } from "../utils/aiLogic";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Common Components
+import Button from "../components/common/Button";
+import Modal from "../components/common/Modal";
+
+const PREDEFINED_COLORS = [
+    "#000000", "#ffffff", "#9ca3af", "#fef3c7", 
+    "#8b4513", "#1e3a8a", "#3b82f6", "#ef4444", 
+    "#22c55e", "#ec4899", "#eab308", "#8B5CF6"
+];
 
 export default function Wardrobe() {
     const { user } = useAuth();
@@ -49,6 +60,7 @@ export default function Wardrobe() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!file) return toast.error("Vui lòng tải ảnh lên trước!");
         setIsUploading(true);
         const success = await handleAddCloth(file, formData);
         setIsUploading(false);
@@ -78,340 +90,299 @@ export default function Wardrobe() {
     if (loading) return <WardrobeSkeleton />;
 
     return (
-        <div className="space-y-6 relative px-4 md:px-0">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">
-                    Tủ đồ của tôi ({clothes.length})
-                </h1>
-                <button
+        <div className="space-y-8 relative px-4 md:px-0">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-primary tracking-tight">
+                        Tủ đồ của tôi
+                    </h1>
+                    <p className="text-muted font-medium mt-1">Đang có {clothes.length} món đồ</p>
+                </div>
+                
+                <Button 
+                    variant="primary" 
                     onClick={() => setShowForm(!showForm)}
-                    className="bg-black text-white px-4 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    leftIcon={showForm ? <ImageMinus size={20} /> : <Plus size={20} />}
                 >
-                    <Plus className="w-5 h-5" />
-                    <span className="hidden sm:inline">Thêm đồ mới</span>
-                </button>
+                    {showForm ? "Đóng form" : "Thêm đồ mới"}
+                </Button>
             </div>
 
-            {/* FORM THÊM MỚI */}
-            {showForm && (
-                <form
-                    onSubmit={handleSubmit}
-                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-8 grid grid-cols-1 md:grid-cols-2 gap-8"
-                >
-                    <div className="border-2 border-dashed border-gray-300 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 hover:border-gray-400 transition-all relative overflow-hidden group min-h-[250px]">
-                        {isAnalyzingImage && (
-                            <div className="absolute inset-0 z-30 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center">
-                                <Loader2 className="w-8 h-8 text-black animate-spin mb-3" />
-                                <p className="text-sm font-bold text-gray-800">AI đang phân tích ảnh...</p>
-                            </div>
-                        )}
-                        {file ? (
-                            <>
-                                <img
-                                    src={URL.createObjectURL(file)}
-                                    alt="Preview"
-                                    className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity"
-                                />
-                                <div className="relative z-10 bg-white/90 p-3 rounded-lg shadow-sm border border-gray-100 backdrop-blur-sm">
-                                    <p className="text-sm font-bold text-gray-800 line-clamp-1">{file.name}</p>
-                                    <p className="text-[10px] text-gray-500 mt-0.5">Nhấn để thay đổi ảnh khác</p>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <div className="p-4 bg-gray-100 rounded-full mb-3 group-hover:scale-110 transition-transform">
-                                    <UploadCloud className="w-8 h-8 text-gray-500" />
-                                </div>
-                                <h3 className="text-base font-bold text-gray-800 mb-1">Tải ảnh trang phục lên</h3>
-                                <p className="text-xs text-gray-500 max-w-[200px]">
-                                    Hỗ trợ JPG, PNG. Ảnh nên được chụp rõ trên nền sáng.
-                                </p>
-                            </>
-                        )}
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={async (e) => {
-                                const selectedFile = e.target.files[0];
-                                if (!selectedFile) return;
-                                setFile(selectedFile);
-                                
-                                try {
-                                    setIsAnalyzingImage(true);
-                                    const imagePart = await fileToGenerativePart(selectedFile);
-                                    const aiResult = await analyzeClothingImage(imagePart, categories);
-                                    
-                                    if (aiResult?.category_id && aiResult?.color_hex) {
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            category_id: aiResult.category_id,
-                                            color_hex: aiResult.color_hex
-                                        }));
-                                        toast.success("AI đã nhận diện xong!");
-                                    }
-                                } catch (error) {
-                                    console.error("AI Analysis Failed", error);
-                                    toast.error("AI không thể nhận diện ảnh, bạn có thể tự chọn thủ công.");
-                                } finally {
-                                    setIsAnalyzingImage(false);
-                                }
-                            }}
-                            disabled={isAnalyzingImage || isUploading}
-                            className={`absolute inset-0 w-full h-full opacity-0 z-20 ${isAnalyzingImage || isUploading ? 'cursor-not-allowed' : 'cursor-pointer'} text-sm text-gray-500`}
-                        />
-                    </div>
-
-                    <div className="space-y-5 flex flex-col justify-center">
-                        <div>
-                            <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                                Loại trang phục
-                            </label>
-                            <div className="relative">
-                                {(() => {
-                                    const groupedCategories = categories.reduce((acc, cat) => {
-                                        const type = cat.type || "Khác";
-                                        acc[type] = acc[type] || [];
-                                        acc[type].push(cat);
-                                        return acc;
-                                    }, {});
-
-                                    const translateType = {
-                                        Tops: "CÁC LOẠI ÁO",
-                                        Bottoms: "QUẦN & VÁY",
-                                        Outerwear: "ÁO KHOÁC",
-                                        Footwear: "GIÀY DÉP",
-                                        Khác: "KHÁC",
-                                    };
-
-                                    return (
-                                        <select
-                                            value={formData.category_id}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, category_id: e.target.value })
+            {/* FORM THÊM MỚI (ANIMATED) */}
+            <AnimatePresence>
+                {showForm && (
+                    <motion.form
+                        initial={{ opacity: 0, height: 0, y: -20 }}
+                        animate={{ opacity: 1, height: 'auto', y: 0 }}
+                        exit={{ opacity: 0, height: 0, y: -20 }}
+                        onSubmit={handleSubmit}
+                        className="bg-surface p-8 rounded-[2rem] shadow-glass border border-white overflow-hidden"
+                    >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            {/* KHU VỰC UPLOAD */}
+                            <div className="border-2 border-dashed border-gray-200 rounded-[1.5rem] p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50/50 hover:border-ai transition-all relative group min-h-[300px]">
+                                {isAnalyzingImage && (
+                                    <div className="absolute inset-0 z-30 bg-surface/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-[1.5rem]">
+                                        <div className="relative w-12 h-12 mx-auto mb-3">
+                                            <div className="absolute inset-0 border-4 border-ai-light/30 rounded-full"></div>
+                                            <div className="absolute inset-0 border-4 border-ai rounded-full border-t-transparent animate-spin"></div>
+                                        </div>
+                                        <p className="text-sm font-bold text-primary">AI đang tách nền & phân tích...</p>
+                                    </div>
+                                )}
+                                {file ? (
+                                    <div className="w-full h-full p-4 flex items-center justify-center">
+                                        <img
+                                            src={URL.createObjectURL(file)}
+                                            alt="Preview"
+                                            className="w-full h-full object-contain mix-blend-multiply opacity-80 group-hover:opacity-40 transition-opacity"
+                                        />
+                                        <div className="absolute z-10 opacity-0 group-hover:opacity-100 bg-surface/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-glass border border-gray-100 transition-all font-bold text-sm text-primary">
+                                            Nhấn đúp đổi ảnh
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center">
+                                        <div className="p-5 bg-ai/5 rounded-[1.5rem] mb-4 group-hover:scale-110 transition-transform group-hover:bg-ai/10">
+                                            <UploadCloud className="w-10 h-10 text-ai" />
+                                        </div>
+                                        <h3 className="text-[17px] font-bold text-primary mb-1">Tải ảnh trang phục lên</h3>
+                                        <p className="text-sm text-muted max-w-[220px]">
+                                            AI sẽ tự động nhận diện màu sắc và phân loại giúp bạn.
+                                        </p>
+                                    </div>
+                                )}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                        const selectedFile = e.target.files[0];
+                                        if (!selectedFile) return;
+                                        setFile(selectedFile);
+                                        
+                                        try {
+                                            setIsAnalyzingImage(true);
+                                            const imagePart = await fileToGenerativePart(selectedFile);
+                                            const aiResult = await analyzeClothingImage(imagePart, categories);
+                                            
+                                            if (aiResult?.category_id && aiResult?.color_hex) {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    category_id: aiResult.category_id,
+                                                    color_hex: aiResult.color_hex
+                                                }));
+                                                toast.success("AI đã nhận diện xong!");
                                             }
-                                            className="w-full p-3.5 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-black bg-gray-50 transition-all hover:bg-white appearance-none"
-                                        >
-                                            {Object.keys(groupedCategories).map((type) => (
-                                                <optgroup
-                                                    key={type}
-                                                    label={translateType[type] || type}
-                                                    className="font-bold text-gray-500 bg-white"
-                                                >
-                                                    {groupedCategories[type].map((cat) => (
-                                                        <option
-                                                            key={cat.id}
-                                                            value={cat.id}
-                                                            className="font-normal text-gray-900"
-                                                        >
-                                                            {cat.name}
-                                                        </option>
-                                                    ))}
-                                                </optgroup>
-                                            ))}
-                                        </select>
-                                    );
-                                })()}
-                                {/* Custom arrow for select */}
-                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
-                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                                </div>
+                                        } catch (error) {
+                                            console.error("AI Analysis Failed", error);
+                                            toast.error("AI không thể nhận diện ảnh, bạn có thể chọn thủ công nhé.");
+                                        } finally {
+                                            setIsAnalyzingImage(false);
+                                        }
+                                    }}
+                                    disabled={isAnalyzingImage || isUploading}
+                                    className={`absolute inset-0 w-full h-full opacity-0 z-20 ${isAnalyzingImage || isUploading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                />
                             </div>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-5">
-                            {(() => {
-                                const PREDEFINED_COLORS = [
-                                    "#000000", "#ffffff", "#9ca3af", "#fef3c7", 
-                                    "#8b4513", "#1e3a8a", "#3b82f6", "#ef4444", 
-                                    "#22c55e", "#ec4899", "#eab308"
-                                ];
+                            {/* KHU VỰC ĐIỀN THÔNG TIN */}
+                            <div className="space-y-6 flex flex-col justify-center">
+                                <div>
+                                    <label className="block text-sm font-semibold mb-2 text-primary">
+                                        Loại trang phục
+                                    </label>
+                                    <div className="relative">
+                                        {(() => {
+                                            const groupedCategories = categories.reduce((acc, cat) => {
+                                                const type = cat.type || "Khác";
+                                                acc[type] = acc[type] || [];
+                                                acc[type].push(cat);
+                                                return acc;
+                                            }, {});
 
-                                return (
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2 text-gray-700">
-                                            Màu sắc chính
-                                        </label>
-                                        <div className="space-y-3">
-                                            {/* Bảng màu có sẵn để chọn nhanh */}
-                                            <div className="flex flex-wrap gap-2">
-                                                {PREDEFINED_COLORS.map(color => (
-                                                    <button
-                                                        key={color}
-                                                        type="button"
-                                                        onClick={() => setFormData({ ...formData, color_hex: color })}
-                                                        className={`w-8 h-8 rounded-full border shadow-sm transition-transform hover:scale-110 ${formData.color_hex.toLowerCase() === color ? 'ring-2 ring-black ring-offset-2 scale-110' : 'border-gray-200'}`}
-                                                        style={{ backgroundColor: color }}
-                                                        title={color}
-                                                    />
-                                                ))}
-                                            </div>
+                                            const translateType = {
+                                                Tops: "CÁC LOẠI ÁO", Bottoms: "QUẦN & VÁY", Outerwear: "ÁO KHOÁC", Footwear: "GIÀY DÉP", Khác: "KHÁC",
+                                            };
 
-                                            {/* Custom Picker nếu muốn */}
-                                            <div className="flex items-center gap-3 border border-gray-200 p-2 rounded-xl bg-gray-50 w-fit">
-                                                <input
-                                                    type="color"
-                                                    value={formData.color_hex}
+                                            return (
+                                                <select
+                                                    value={formData.category_id}
                                                     onChange={(e) =>
-                                                        setFormData({ ...formData, color_hex: e.target.value })
+                                                        setFormData({ ...formData, category_id: e.target.value })
                                                     }
-                                                    className="w-6 h-6 rounded cursor-pointer border-0 p-0 overflow-hidden"
-                                                    title="Mở bảng màu nâng cao"
+                                                    className="w-full h-12 px-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai bg-surface transition-all appearance-none font-medium"
+                                                >
+                                                    {Object.keys(groupedCategories).map((type) => (
+                                                        <optgroup key={type} label={translateType[type] || type} className="font-bold bg-white">
+                                                            {groupedCategories[type].map((cat) => (
+                                                                <option key={cat.id} value={cat.id} className="font-medium">
+                                                                    {cat.name}
+                                                                </option>
+                                                            ))}
+                                                        </optgroup>
+                                                    ))}
+                                                </select>
+                                            );
+                                        })()}
+                                        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+                                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6">
+                                    {/* Chọn Màu Sắc */}
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-2 text-primary">Màu sắc chính</label>
+                                        <div className="flex flex-wrap gap-2 mb-3">
+                                            {PREDEFINED_COLORS.map(color => (
+                                                <button
+                                                    key={color}
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, color_hex: color })}
+                                                    className={`w-[30px] h-[30px] rounded-full border shadow-sm transition-transform hover:scale-110 ${formData.color_hex.toLowerCase() === color.toLowerCase() ? 'ring-2 ring-primary ring-offset-2 scale-110 border-transparent' : 'border-gray-200'}`}
+                                                    style={{ backgroundColor: color }}
+                                                    title={color}
                                                 />
-                                                <span className="text-xs font-medium text-gray-500 uppercase pr-2">
-                                                    Mã: {formData.color_hex}
-                                                </span>
+                                            ))}
+                                        </div>
+                                        <div className="flex items-center gap-2 border border-gray-200 p-1.5 rounded-xl bg-gray-50/50 w-fit">
+                                            <input
+                                                type="color"
+                                                value={formData.color_hex}
+                                                onChange={(e) => setFormData({ ...formData, color_hex: e.target.value })}
+                                                className="w-7 h-7 rounded-[8px] cursor-pointer border-0 p-0 overflow-hidden"
+                                                title="Mở bảng chọn màu nâng cao"
+                                            />
+                                            <span className="text-xs font-bold text-primary uppercase pr-3 font-mono">
+                                                {formData.color_hex}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Chọn Thời tiết */}
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-2 text-primary">Thời tiết gợi ý</label>
+                                        <div className="relative">
+                                            <select
+                                                value={formData.weather_suitability}
+                                                onChange={(e) => setFormData({ ...formData, weather_suitability: e.target.value })}
+                                                className="w-full h-12 px-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai bg-surface hover:bg-gray-50 transition-all appearance-none font-medium"
+                                            >
+                                                <option value="All">Bốn mùa 🌤️</option>
+                                                <option value="Hot">Mùa Hè ☀️</option>
+                                                <option value="Cold">Mùa Đông ❄️</option>
+                                            </select>
+                                            <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+                                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                                             </div>
                                         </div>
                                     </div>
-                                );
-                            })()}
-                            <div>
-                                <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                                    Thời tiết
-                                </label>
-                                <div className="relative">
-                                    <select
-                                        value={formData.weather_suitability}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, weather_suitability: e.target.value })
-                                        }
-                                        className="w-full p-3.5 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-black bg-gray-50 hover:bg-white transition-all appearance-none"
-                                    >
-                                        <option value="All">Bốn mùa 🌤️</option>
-                                        <option value="Hot">Mùa Hè ☀️</option>
-                                        <option value="Cold">Mùa Đông ❄️</option>
-                                    </select>
-                                    <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
-                                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                                    </div>
                                 </div>
+
+                                <Button
+                                    type="submit"
+                                    isLoading={isUploading}
+                                    variant="primary"
+                                    className="w-full !mt-6 shadow-soft"
+                                >
+                                    {isUploading ? "Đang xử lý..." : "Lưu vào Tủ Đồ"}
+                                </Button>
                             </div>
                         </div>
+                    </motion.form>
+                )}
+            </AnimatePresence>
 
-                        <button
-                            type="submit"
-                            disabled={isUploading}
-                            className="w-full bg-black text-white py-3.5 rounded-xl font-bold hover:bg-gray-800 disabled:opacity-50 flex justify-center items-center gap-2 mt-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
-                        >
-                            {isUploading ? <Loader2 className="animate-spin w-5 h-5" /> : "Lưu vào Tủ Đồ"}
-                        </button>
-                    </div>
-                </form>
-            )}
-
-            {/* DANH SÁCH QUẦN ÁO */}
+            {/* DANH SÁCH QUẦN ÁO BẰNG ANIMATE DASHBOARD */}
             {clothes.length === 0 && !showForm ? (
                 <WardrobeEmptyState onAction={() => setShowForm(true)} />
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-                    {clothes.map((item) => (
-                        <ClothCard
-                            key={item.id}
-                            item={item}
-                            handleToggleStatus={handleToggleClothStatus}
-                            openEditModal={openEditModal}
-                            handleDelete={handleDeleteCloth}
-                        />
-                    ))}
-                </div>
+                <motion.div 
+                    layout
+                    className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"
+                >
+                    <AnimatePresence>
+                        {clothes.map((item) => (
+                            <ClothCard
+                                key={item.id}
+                                item={item}
+                                handleToggleStatus={handleToggleClothStatus}
+                                openEditModal={openEditModal}
+                                handleDelete={handleDeleteCloth}
+                            />
+                        ))}
+                    </AnimatePresence>
+                </motion.div>
             )}
 
-
-            {/* POPUP MODAL CHỈNH SỬA */}
-            {editingCloth && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-                        <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-                            <h2 className="font-bold text-lg">Chỉnh sửa trang phục</h2>
-                            <button
-                                onClick={() => setEditingCloth(null)}
-                                className="text-gray-500 hover:bg-gray-200 p-1 rounded-full transition-colors"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <div className="p-6 space-y-4">
-                            <div className="flex gap-4 items-center p-3 bg-gray-50 rounded-xl mb-4 border border-gray-100">
+            {/* POPUP MODAL CHỈNH SỬA - TÍCH HỢP UI COMPONENT */}
+            <Modal
+                isOpen={!!editingCloth}
+                onClose={() => setEditingCloth(null)}
+                title="Sửa thông tin đồ"
+                size="md"
+            >
+                {editingCloth && (
+                    <div className="space-y-6">
+                        {/* Preview Ảnh Nhỏ */}
+                        <div className="flex gap-4 items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <div className="w-[72px] h-[88px] bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-shrink-0">
                                 <img
                                     src={editingCloth.image_url}
-                                    className="w-16 h-16 rounded-lg object-cover shadow-sm border border-gray-200"
-                                    alt="Preview"
+                                    className="w-full h-full object-cover mix-blend-multiply"
+                                    alt="Preview edit"
                                 />
-                                <p className="text-sm text-gray-500 italic">
-                                    Lưu ý: Không thể đổi hình ảnh. Hãy xóa và tải lên lại nếu ảnh bị sai.
-                                </p>
                             </div>
+                            <p className="text-sm text-muted leading-relaxed font-medium">
+                                Không thể thay thế hình ảnh. Nếu nhầm ảnh, bạn vui lòng xóa và đăng món đồ mới nhé.
+                            </p>
+                        </div>
 
+                        {/* Fields */}
+                        <div className="space-y-5">
                             <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    Đổi loại trang phục
-                                </label>
+                                <label className="block text-sm font-semibold mb-2 text-primary text-left">Đổi phân loại</label>
                                 <select
                                     value={editFormData.category_id}
-                                    onChange={(e) =>
-                                        setEditFormData({ ...editFormData, category_id: e.target.value })
-                                    }
-                                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-black"
+                                    onChange={(e) => setEditFormData({ ...editFormData, category_id: e.target.value })}
+                                    className="w-full h-12 px-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai text-primary appearance-none font-medium"
                                 >
                                     {categories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>
-                                            {cat.name}
-                                        </option>
+                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
                                 </select>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                {(() => {
-                                    const PREDEFINED_COLORS = [
-                                        "#000000", "#ffffff", "#9ca3af", "#fef3c7", 
-                                        "#8b4513", "#1e3a8a", "#3b82f6", "#ef4444", 
-                                        "#22c55e", "#ec4899", "#eab308"
-                                    ];
-                                    
-                                    return (
-                                        <div className="col-span-2 sm:col-span-1">
-                                            <label className="block text-sm font-medium mb-2">Màu sắc chính</label>
-                                            <div className="flex flex-wrap gap-2 mb-3">
-                                                {PREDEFINED_COLORS.map(color => (
-                                                    <button
-                                                        key={color}
-                                                        type="button"
-                                                        onClick={() => setEditFormData({ ...editFormData, color_hex: color })}
-                                                        className={`w-7 h-7 rounded-full border shadow-sm transition-transform hover:scale-110 ${editFormData.color_hex.toLowerCase() === color ? 'ring-2 ring-black ring-offset-1 scale-110' : 'border-gray-200'}`}
-                                                        style={{ backgroundColor: color }}
-                                                        title={color}
-                                                    />
-                                                ))}
-                                            </div>
-                                            <div className="flex items-center gap-3 border border-gray-200 p-1.5 rounded-lg bg-gray-50 w-full">
-                                                <input
-                                                    type="color"
-                                                    value={editFormData.color_hex}
-                                                    onChange={(e) =>
-                                                        setEditFormData({ ...editFormData, color_hex: e.target.value })
-                                                    }
-                                                    className="w-8 h-8 rounded cursor-pointer border-0 p-0 overflow-hidden"
-                                                />
-                                                <span className="text-xs font-medium text-gray-500 uppercase">
-                                                    Mã: {editFormData.color_hex}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Thời tiết</label>
+                            <div className="grid grid-cols-2 gap-5">
+                                <div className="col-span-2 sm:col-span-1 text-left">
+                                    <label className="block text-sm font-semibold mb-2 text-primary">Chỉnh màu</label>
+                                    <div className="flex flex-wrap gap-2 mb-3">
+                                        {PREDEFINED_COLORS.slice(0,8).map(color => (
+                                            <button
+                                                key={color}
+                                                type="button"
+                                                onClick={() => setEditFormData({ ...editFormData, color_hex: color })}
+                                                className={`w-6 h-6 rounded-full border shadow-sm transition-transform hover:scale-110 ${editFormData.color_hex.toLowerCase() === color.toLowerCase() ? 'ring-2 ring-primary ring-offset-2 scale-110' : 'border-gray-200'}`}
+                                                style={{ backgroundColor: color }}
+                                            />
+                                        ))}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="color"
+                                            value={editFormData.color_hex}
+                                            onChange={(e) => setEditFormData({ ...editFormData, color_hex: e.target.value })}
+                                            className="w-8 h-8 rounded-xl cursor-pointer border-0 p-0"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="text-left">
+                                    <label className="block text-sm font-semibold mb-2 text-primary">Thời tiết</label>
                                     <select
                                         value={editFormData.weather_suitability}
-                                        onChange={(e) =>
-                                            setEditFormData({
-                                                ...editFormData,
-                                                weather_suitability: e.target.value,
-                                            })
-                                        }
-                                        className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-black"
+                                        onChange={(e) => setEditFormData({ ...editFormData, weather_suitability: e.target.value })}
+                                        className="w-full h-12 px-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai text-primary appearance-none font-medium"
                                     >
                                         <option value="All">Bốn mùa</option>
                                         <option value="Hot">Mùa Hè</option>
@@ -421,23 +392,17 @@ export default function Wardrobe() {
                             </div>
                         </div>
 
-                        <div className="p-4 border-t flex justify-end gap-3 bg-gray-50">
-                            <button
-                                onClick={() => setEditingCloth(null)}
-                                className="px-4 py-2 font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition"
-                            >
+                        <div className="flex gap-3 pt-2">
+                            <Button variant="ghost" onClick={() => setEditingCloth(null)} className="flex-1 bg-gray-100 hover:bg-gray-200">
                                 Hủy
-                            </button>
-                            <button
-                                onClick={handleSaveEdit}
-                                className="px-4 py-2 font-medium bg-black text-white rounded-lg hover:bg-gray-800 transition"
-                            >
-                                Lưu thay đổi
-                            </button>
+                            </Button>
+                            <Button variant="primary" onClick={handleSaveEdit} className="flex-1">
+                                Cập nhật
+                            </Button>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </Modal>
         </div>
     );
 }

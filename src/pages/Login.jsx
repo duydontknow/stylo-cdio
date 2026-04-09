@@ -1,8 +1,10 @@
-// src/pages/Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../services/supabase";
-import { Mail, Lock, Loader2, Shirt } from "lucide-react";
+import { Mail, Lock, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Button from "../components/common/Button";
+import Input from "../components/common/Input";
 
 export default function Login() {
     const [isLogin, setIsLogin] = useState(true);
@@ -73,127 +75,127 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4">
-            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+        <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4 relative overflow-hidden">
+            {/* Background ambient glowing blurs */}
+            <div className="absolute top-[-15%] left-[-10%] w-[50%] h-[50%] bg-ai/20 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
+
+            <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
+                className="w-full max-w-md md:max-w-[26rem] bg-surface/80 backdrop-blur-xl rounded-[2rem] shadow-glass border border-white/50 p-8 md:p-10 z-10"
+            >
                 {/* Logo & Tiêu đề */}
-                <div className="flex flex-col items-center mb-8">
-                    <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mb-4">
-                        <Shirt size={24} />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900">
+                <div className="flex flex-col items-center mb-8 text-center">
+                    <motion.div 
+                        whileHover={{ rotate: 180 }}
+                        transition={{ duration: 0.6, type: "spring", bounce: 0.5 }}
+                        className="w-14 h-14 bg-primary text-white rounded-[1.25rem] flex items-center justify-center mb-5 shadow-soft"
+                    >
+                        <Sparkles size={26} className="text-ai-light" />
+                    </motion.div>
+                    <h2 className="text-2xl md:text-[1.75rem] font-bold text-primary tracking-tight">
                         {isLogin
-                            ? "Chào mừng trở lại STYLO"
+                            ? "Mừng bạn trở lại!"
                             : "Tạo tài khoản STYLO"}
                     </h2>
-                    <p className="text-gray-500 text-sm mt-2">
+                    <p className="text-muted text-sm mt-2.5 font-medium">
                         {isLogin
-                            ? "Đăng nhập để quản lý tủ đồ của bạn"
-                            : "Bắt đầu hành trình mặc đẹp mỗi ngày"}
+                            ? "Đăng nhập để AI chọn đồ cho bạn hôm nay."
+                            : "Bắt đầu hành trình mặc đẹp cùng công nghệ AI."}
                     </p>
                 </div>
 
-                {/* Thông báo lỗi nếu có */}
-                {error && (
-                    <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm text-center">
-                        {error}
-                    </div>
-                )}
+                {/* Thông báo lỗi nếu có kèm animation */}
+                <AnimatePresence mode="wait">
+                    {error && (
+                        <motion.div 
+                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
+                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="p-3.5 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm text-center font-medium shadow-sm relative">
+                                {error}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* Form nhập liệu */}
                 <form onSubmit={handleAuth} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Email
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Mail className="h-5 w-5 text-gray-400" />
-                            </div>
-                            <input
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black sm:text-sm"
-                                placeholder="you@example.com"
-                            />
-                        </div>
-                    </div>
+                    <Input
+                        label="Email"
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        leftIcon={<Mail className="h-[18px] w-[18px]" />}
+                    />
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Mật khẩu
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Lock className="h-5 w-5 text-gray-400" />
-                            </div>
-                            <input
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black sm:text-sm"
-                                placeholder="••••••••"
-                                minLength={6}
-                            />
-                        </div>
-                    </div>
+                    <Input
+                        label="Mật khẩu"
+                        type="password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        minLength={6}
+                        leftIcon={<Lock className="h-[18px] w-[18px]" />}
+                    />
 
                     {/* Ô Xác nhận mật khẩu (Chỉ hiển thị khi ở chế độ Đăng ký) */}
-                    {!isLogin && (
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Xác nhận mật khẩu
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Lock className="h-5 w-5 text-gray-400" />
+                    <AnimatePresence>
+                        {!isLogin && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="overflow-hidden"
+                            >
+                                <div className="pt-4">
+                                    <Input
+                                        label="Xác nhận mật khẩu"
+                                        type="password"
+                                        required
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        placeholder="••••••••"
+                                        minLength={6}
+                                        leftIcon={<Lock className="h-[18px] w-[18px]" />}
+                                    />
                                 </div>
-                                <input
-                                    type="password"
-                                    required
-                                    value={confirmPassword}
-                                    onChange={(e) =>
-                                        setConfirmPassword(e.target.value)
-                                    }
-                                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black sm:text-sm"
-                                    placeholder="••••••••"
-                                    minLength={6}
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-                    >
-                        {loading ? (
-                            <Loader2 className="animate-spin h-5 w-5" />
-                        ) : isLogin ? (
-                            "Đăng nhập"
-                        ) : (
-                            "Đăng ký"
+                            </motion.div>
                         )}
-                    </button>
+                    </AnimatePresence>
+
+                    <Button
+                        type="submit"
+                        isLoading={loading}
+                        variant="primary"
+                        className="w-full !mt-8"
+                        size="md"
+                    >
+                        {isLogin ? "Đăng nhập ngay" : "Tạo tài khoản"}
+                    </Button>
                 </form>
 
                 {/* Chuyển đổi giữa Đăng nhập / Đăng ký */}
-                <div className="mt-6 text-center text-sm">
-                    <span className="text-gray-600">
+                <div className="mt-8 text-center text-sm">
+                    <span className="text-muted font-medium">
                         {isLogin ? "Chưa có tài khoản? " : "Đã có tài khoản? "}
                     </span>
                     <button
                         type="button"
                         onClick={toggleMode}
-                        className="font-medium text-black hover:underline focus:outline-none"
+                        className="font-semibold text-primary hover:text-ai transition-colors focus:outline-none ml-1"
                     >
                         {isLogin ? "Đăng ký ngay" : "Đăng nhập"}
                     </button>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }
