@@ -143,9 +143,7 @@ export default function Dashboard() {
                             {weather.condition}
                         </p>
                         <p className="text-sm text-white/80 leading-relaxed">
-                            {weather.temp > 25
-                                ? "Thời tiết ấm áp, ưu tiên quần áo thoáng mát."
-                                : "Trời khá lạnh, nhớ mặc đủ ấm nhé!"}
+                            {weather.advice || "Đang cập nhật gợi ý..."}
                         </p>
                     </div>
                     <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>

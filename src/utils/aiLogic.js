@@ -164,14 +164,14 @@ export const analyzeClothingImage = async (imagePart, categoriesList) => {
             { name: "Đỏ", hex: "#ef4444" },
             { name: "Xanh lá", hex: "#22c55e" },
             { name: "Hồng", hex: "#ec4899" },
-            { name: "Vàng", hex: "#eab308" }
+            { name: "Vàng", hex: "#eab308" },
         ];
 
         // Tối giản hoá danh sách category để tăng độ chính xác của AI
-        const simplifiedCategories = categoriesList.map(c => ({
+        const simplifiedCategories = categoriesList.map((c) => ({
             id: c.id,
             name: c.name,
-            type: c.type
+            type: c.type,
         }));
 
         const prompt = `
