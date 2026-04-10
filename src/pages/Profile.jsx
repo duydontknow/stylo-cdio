@@ -96,19 +96,19 @@ export default function Profile() {
             variants={containerVariants}
             className="max-w-3xl mx-auto space-y-8 px-4 sm:px-0"
         >
-            <motion.div variants={itemVariants}>
-                <h1 className="text-3xl font-bold text-primary tracking-tight">
+            <motion.div variants={itemVariants} className="text-center md:text-left">
+                <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight">
                     Hồ sơ Cá nhân
                 </h1>
-                <p className="text-muted font-medium mt-1">
+                <p className="text-muted font-bold mt-1 text-base md:text-lg">
                     Cập nhật chỉ số cơ thể để AI gợi ý trang phục chuẩn xác nhất dành riêng cho bạn.
                 </p>
             </motion.div>
 
             {/* Dữ liệu tài khoản cơ bản */}
-            <motion.div variants={itemVariants} className="bg-gradient-to-br from-primary to-slate-800 p-8 rounded-[2rem] shadow-soft text-white relative overflow-hidden">
+            <motion.div variants={itemVariants} className="bg-gradient-to-br from-primary to-slate-800 p-6 md:p-8 rounded-[2rem] shadow-soft text-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[80px] pointer-events-none" />
-                <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                <div className="relative z-10 flex flex-col md:flex-row items-center md:items-center gap-6">
                     <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center p-1 border border-white/20 backdrop-blur-md">
                         <div className="w-full h-full bg-white/20 rounded-full flex items-center justify-center">
                             <User size={32} className="text-white" />
@@ -130,7 +130,7 @@ export default function Profile() {
             <motion.form
                 variants={itemVariants}
                 onSubmit={handleSubmit}
-                className="bg-surface p-8 rounded-[2rem] shadow-glass border border-gray-100 space-y-8 relative overflow-hidden"
+                className="bg-surface p-6 md:p-8 rounded-[2rem] shadow-glass border border-gray-100 space-y-8 relative overflow-hidden"
             >
                 {/* Ambient glow */}
                 <div className="absolute -top-40 -right-40 w-80 h-80 bg-ai/5 rounded-full blur-[100px] pointer-events-none -z-10" />

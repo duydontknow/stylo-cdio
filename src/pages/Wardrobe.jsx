@@ -91,12 +91,12 @@ export default function Wardrobe() {
 
     return (
         <div className="space-y-8 relative px-4 md:px-0">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-primary tracking-tight">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6">
+                <div className="text-center md:text-left">
+                    <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight">
                         Tủ đồ của tôi
                     </h1>
-                    <p className="text-muted font-medium mt-1">Đang có {clothes.length} món đồ</p>
+                    <p className="text-muted font-bold mt-1">Đang có {clothes.length} món đồ</p>
                 </div>
                 
                 <Button 
@@ -116,11 +116,11 @@ export default function Wardrobe() {
                         animate={{ opacity: 1, height: 'auto', y: 0 }}
                         exit={{ opacity: 0, height: 0, y: -20 }}
                         onSubmit={handleSubmit}
-                        className="bg-surface p-8 rounded-[2rem] shadow-glass border border-white overflow-hidden"
+                        className="bg-surface p-6 md:p-8 rounded-[2rem] shadow-glass border border-white overflow-hidden relative z-20"
                     >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
                             {/* KHU VỰC UPLOAD */}
-                            <div className="border-2 border-dashed border-gray-200 rounded-[1.5rem] p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50/50 hover:border-ai transition-all relative group min-h-[300px]">
+                            <div className="border-2 border-dashed border-gray-200 rounded-[1.5rem] p-6 md:p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50/50 hover:border-ai transition-all relative group min-h-[250px] md:min-h-[300px]">
                                 {isAnalyzingImage && (
                                     <div className="absolute inset-0 z-30 bg-surface/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-[1.5rem]">
                                         <div className="relative w-12 h-12 mx-auto mb-3">

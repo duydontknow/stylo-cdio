@@ -145,7 +145,7 @@ export default function AiStylist() {
                 {/* 1. Nút chọn nhanh */}
                 <div>
                     <label className="block text-sm font-semibold text-primary mb-3 pl-1">Ngữ cảnh đề xuất nhanh:</label>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {[
                             { id: "Work", name: "Đi làm", icon: Briefcase, color: "bg-blue-500", shadow: "shadow-blue-500/30", bgHover: "hover:bg-blue-50" },
                             { id: "Casual", name: "Dạo phố", icon: Coffee, color: "bg-green-500", shadow: "shadow-green-500/30", bgHover: "hover:bg-green-50" },
@@ -160,9 +160,9 @@ export default function AiStylist() {
                                     handleGenerate(ctx.name);
                                 }}
                                 disabled={isGenerating}
-                                className={`flex flex-col md:flex-row items-center justify-center gap-2.5 p-4 bg-white rounded-2xl ${ctx.bgHover} transition-colors border border-gray-100 shadow-sm`}
+                                className={`flex flex-row sm:flex-col md:flex-row items-center justify-center gap-3 p-4 bg-white rounded-2xl ${ctx.bgHover} transition-colors border border-gray-100 shadow-sm`}
                             >
-                                <div className={`w-10 h-10 ${ctx.color} text-white rounded-[14px] flex items-center justify-center shadow-md ${ctx.shadow}`}>
+                                <div className={`shrink-0 w-10 h-10 ${ctx.color} text-white rounded-[14px] flex items-center justify-center shadow-md ${ctx.shadow}`}>
                                     <ctx.icon size={20} />
                                 </div>
                                 <span className="font-bold text-primary">{ctx.name}</span>
@@ -255,7 +255,7 @@ export default function AiStylist() {
                             key={idx}
                             variants={outfitVariants}
                             layout
-                            className="bg-surface/90 backdrop-blur-md rounded-[2rem] p-6 border border-gray-100 shadow-glass relative overflow-hidden"
+                            className="bg-surface/90 backdrop-blur-md rounded-[2.5rem] md:rounded-[2rem] p-5 md:p-6 border border-gray-100 shadow-glass relative overflow-hidden"
                         >
                             <div className="absolute top-0 right-0 z-10">
                                 <Badge variant="ai" className="rounded-bl-2xl rounded-tr-[2rem] rounded-tl-none rounded-br-none px-4 py-1.5 font-bold">

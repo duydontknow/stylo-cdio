@@ -270,12 +270,12 @@ export default function Outfits() {
     return (
         <div className="max-w-6xl mx-auto space-y-8 relative pb-10 px-4 md:px-0">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-primary tracking-tight">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="text-center md:text-left">
+                    <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight">
                         Bộ sưu tập Outfit
                     </h1>
-                    <p className="text-muted font-medium mt-1">
+                    <p className="text-muted font-bold mt-1">
                         Tổng cộng {outfits.length} bộ trang phục đã được lưu
                     </p>
                 </div>
@@ -318,7 +318,7 @@ export default function Outfits() {
             ) : (
                 <motion.div 
                     layout
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 md:gap-8"
                 >
                     <AnimatePresence>
                         {outfits.map((outfit) => (
@@ -413,7 +413,7 @@ export default function Outfits() {
                 >
                     <div className="flex flex-col lg:flex-row flex-1 h-full overflow-hidden">
                         {/* LEFT COLUMN: BUILDER */}
-                        <div className="w-full lg:w-[45%] flex flex-col p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-gray-100 overflow-y-auto bg-white custom-scrollbar relative">
+                        <div className="w-full lg:w-[42%] flex flex-col p-5 md:p-8 border-b lg:border-b-0 lg:border-r border-gray-100 overflow-y-auto bg-white custom-scrollbar relative shrink-0">
                             {/* Ambient background */}
                             <div className="absolute top-0 right-0 w-64 h-64 bg-ai/5 rounded-full blur-[80px] pointer-events-none -z-10" />
 

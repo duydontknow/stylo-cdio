@@ -28,7 +28,7 @@ const Modal = ({
     md: 'max-w-lg',
     lg: 'max-w-2xl',
     xl: 'max-w-4xl',
-    full: 'max-w-[95vw] h-[95vh]',
+    full: 'max-w-full md:max-w-[95vw] h-full md:h-[95vh]',
   };
 
   return (
@@ -49,14 +49,15 @@ const Modal = ({
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
               className={cn(
-                "w-full bg-surface shadow-glass rounded-3xl overflow-hidden pointer-events-auto",
+                "w-full bg-surface shadow-glass rounded-[2rem] md:rounded-3xl overflow-hidden pointer-events-auto",
+                size === 'full' ? "rounded-none md:rounded-3xl" : "",
                 sizes[size],
                 className
               )}
             >
               {(title || onClose) && (
-                <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                  {title && <h3 className="text-xl font-semibold text-primary">{title}</h3>}
+                <div className="flex items-center justify-between p-5 md:p-6 border-b border-gray-100 shrink-0">
+                  {title && <h3 className="text-lg md:text-xl font-bold text-primary">{title}</h3>}
                   {onClose && (
                     <button
                       onClick={onClose}
@@ -67,7 +68,7 @@ const Modal = ({
                   )}
                 </div>
               )}
-              <div className={cn("p-6", bodyClassName)}>
+              <div className={cn("p-5 md:p-6", bodyClassName)}>
                 {children}
               </div>
             </motion.div>

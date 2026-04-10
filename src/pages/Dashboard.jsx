@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { getUserClothes } from "../services/clothes";
 import { getUserOutfits } from "../services/outfits";
-import { Shirt, Layers, Sparkles, Plus, ThermometerSun, MapPin } from "lucide-react";
+import { Shirt, Layers, Sparkles, Plus, ThermometerSun, MapPin, User, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getProfile } from "../services/profile";
 import { useWeather } from "../hooks/useWeather";
 import { motion } from "framer-motion";
 import Button from "../components/common/Button";
@@ -13,11 +14,12 @@ const DashboardSkeleton = () => (
     <div className="max-w-5xl mx-auto space-y-8 animate-pulse">
         <div className="h-10 bg-gray-200 rounded-lg w-1/3 mb-2"></div>
         <div className="h-5 bg-gray-200 rounded-lg w-1/4"></div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded-3xl"></div>
-            ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+            <div className="h-24 bg-gray-200 rounded-3xl"></div>
+            <div className="h-24 bg-gray-200 rounded-3xl"></div>
+            <div className="h-24 lg:col-span-2 bg-gray-200 rounded-3xl"></div>
         </div>
+        <div className="h-24 bg-gray-200 rounded-3xl mt-8"></div>
         <div className="h-64 bg-gray-200 rounded-3xl mt-8"></div>
     </div>
 );
@@ -50,23 +52,30 @@ export default function Dashboard() {
 
     const { weather } = useWeather();
     const [stats, setStats] = useState({ clothes: 0, outfits: 0 });
+    const [profileStatus, setProfileStatus] = useState({ isComplete: true, data: null });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchStats() {
+        async function fetchData() {
             try {
-                const [clothes, outfits] = await Promise.all([
+                const [clothes, outfits, profile] = await Promise.all([
                     getUserClothes(user.id),
                     getUserOutfits(user.id),
+                    getProfile(user.id),
                 ]);
+                
                 setStats({ clothes: clothes.length, outfits: outfits.length });
+                
+                const isComplete = !!(profile?.height && profile?.weight && profile?.body_shape && profile?.skin_tone);
+                setProfileStatus({ isComplete, data: profile });
+                
             } catch (error) {
-                console.error("Lỗi tải thống kê", error);
+                console.error("Lỗi tải dữ liệu", error);
             } finally {
                 setLoading(false);
             }
         }
-        fetchStats();
+        fetchData();
     }, [user.id]);
 
     if (loading) return <DashboardSkeleton />;
@@ -87,22 +96,20 @@ export default function Dashboard() {
             </motion.div>
 
             {/* Bento Grid layout */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
                 {/* Stats Card - Quần áo */}
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ scale: 1.02 }}
-                    className="bg-surface p-6 rounded-3xl border border-gray-100 shadow-glass flex flex-col justify-between"
+                    className="bg-surface p-5 rounded-3xl border border-gray-100 shadow-glass flex items-center gap-4"
                 >
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="w-12 h-12 bg-primary/5 text-primary rounded-2xl flex items-center justify-center">
-                            <Shirt className="w-6 h-6" />
-                        </div>
+                    <div className="w-12 h-12 bg-primary/5 text-primary rounded-2xl flex items-center justify-center shrink-0">
+                        <Shirt className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-3xl font-bold text-primary mb-1">{stats.clothes}</p>
-                        <p className="text-sm font-medium text-muted">Tổng trang phục</p>
+                        <p className="text-2xl font-bold text-primary leading-none mb-1">{stats.clothes}</p>
+                        <p className="text-xs font-medium text-muted uppercase tracking-wider">Trang phục</p>
                     </div>
                 </motion.div>
 
@@ -110,23 +117,21 @@ export default function Dashboard() {
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ scale: 1.02 }}
-                    className="bg-surface p-6 rounded-3xl border border-gray-100 shadow-glass flex flex-col justify-between"
+                    className="bg-surface p-5 rounded-3xl border border-gray-100 shadow-glass flex items-center gap-4"
                 >
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="w-12 h-12 bg-ai/10 text-ai rounded-2xl flex items-center justify-center">
-                            <Layers className="w-6 h-6" />
-                        </div>
+                    <div className="w-12 h-12 bg-ai/10 text-ai rounded-2xl flex items-center justify-center shrink-0">
+                        <Layers className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-3xl font-bold text-primary mb-1">{stats.outfits}</p>
-                        <p className="text-sm font-medium text-muted">Bộ phối đồ</p>
+                        <p className="text-2xl font-bold text-primary leading-none mb-1">{stats.outfits}</p>
+                        <p className="text-xs font-medium text-muted uppercase tracking-wider">Phối đồ</p>
                     </div>
                 </motion.div>
 
                 {/* Khối Thời tiết (Glassmorphism + Gradient) */}
                 <motion.div
                     variants={itemVariants}
-                    className="col-span-1 md:col-span-1 bg-gradient-to-br from-ai to-purple-800 p-6 rounded-3xl shadow-glow text-white relative overflow-hidden flex flex-col justify-between"
+                    className="col-span-1 lg:col-span-2 bg-gradient-to-br from-ai to-purple-800 p-6 rounded-3xl shadow-glow text-white relative overflow-hidden flex flex-col justify-between"
                 >
                     <div className="relative z-10 flex justify-between items-start">
                         <div className="flex items-center space-x-2 text-white/80 text-sm font-medium">
@@ -148,6 +153,52 @@ export default function Dashboard() {
                     </div>
                     <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
                     <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-purple-900/40 rounded-full blur-3xl pointer-events-none"></div>
+                </motion.div>
+
+                {/* Personalization Suggestion Card */}
+                <motion.div
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.02 }}
+                    className={`col-span-1 md:col-span-2 lg:col-span-4 p-6 rounded-3xl border border-gray-100 shadow-glass overflow-hidden relative flex flex-col md:flex-row items-center justify-between gap-6 ${
+                        profileStatus.isComplete ? "bg-surface" : "bg-gradient-to-r from-ai/5 to-purple-50"
+                    }`}
+                >
+                    <div className="flex items-center gap-6 relative z-10">
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${
+                            profileStatus.isComplete ? "bg-green-50 text-green-600" : "bg-ai/10 text-ai"
+                        }`}>
+                            <User className="w-7 h-7" />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-primary mb-1">
+                                {profileStatus.isComplete ? "Hồ sơ đã hoàn tất" : "Cá nhân hóa gợi ý"}
+                            </h3>
+                            <p className="text-muted text-sm max-w-md">
+                                {profileStatus.isComplete 
+                                    ? "AI đang sử dụng chỉ số cơ thể của bạn để đưa ra những gợi ý phù hợp nhất." 
+                                    : "Cập nhật chỉ số cơ thể và phong cách để AI có thể đưa ra những gợi ý trang phục chuẩn xác hơn cho riêng bạn."}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <Link to="/profile" className="relative z-10 group shrink-0">
+                        <Button 
+                            variant={profileStatus.isComplete ? "outline" : "primary"} 
+                            size="sm" 
+                            className="pr-2"
+                            rightIcon={<ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+                        >
+                            {profileStatus.isComplete ? "Chỉnh sửa hồ sơ" : "Hoàn thiện ngay"}
+                        </Button>
+                    </Link>
+
+                    {/* Decorative background elements */}
+                    {!profileStatus.isComplete && (
+                        <>
+                            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-ai/10 rounded-full blur-3xl pointer-events-none"></div>
+                            <div className="absolute top-0 left-1/2 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl pointer-events-none"></div>
+                        </>
+                    )}
                 </motion.div>
             </div>
 
