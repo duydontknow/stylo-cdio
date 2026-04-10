@@ -193,16 +193,42 @@ export default function Wardrobe() {
                                     </label>
                                     <div className="relative">
                                         {(() => {
-                                            const groupedCategories = categories.reduce((acc, cat) => {
+                                            // 1. Sort base categories: Name first, but move "Khác" to end
+                                            const sortedItems = [...categories].sort((a, b) => {
+                                                const aIsOther = a.name.includes("Khác") || a.name.includes("Other");
+                                                const bIsOther = b.name.includes("Khác") || b.name.includes("Other");
+                                                if (aIsOther && !bIsOther) return 1;
+                                                if (!aIsOther && bIsOther) return -1;
+                                                return a.name.localeCompare(b.name, 'vi', { sensitivity: 'base' });
+                                            });
+
+                                            // 2. Group by type
+                                            const groupedCategories = sortedItems.reduce((acc, cat) => {
                                                 const type = cat.type || "Khác";
                                                 acc[type] = acc[type] || [];
                                                 acc[type].push(cat);
                                                 return acc;
                                             }, {});
 
+                                            const typeOrder = ["Tops", "Bottoms", "Outerwear", "Footwear", "Accessories", "Khác"];
                                             const translateType = {
-                                                Tops: "CÁC LOẠI ÁO", Bottoms: "QUẦN & VÁY", Outerwear: "ÁO KHOÁC", Footwear: "GIÀY DÉP", Khác: "KHÁC",
+                                                Tops: "CÁC LOẠI ÁO", 
+                                                Bottoms: "QUẦN & VÁY", 
+                                                Outerwear: "ÁO KHOÁC", 
+                                                Footwear: "GIÀY DÉP", 
+                                                Accessories: "PHỤ KIỆN",
+                                                Khác: "KHÁC",
                                             };
+
+                                            // 3. Sort groups based on typeOrder
+                                            const sortedGroups = Object.keys(groupedCategories).sort((a, b) => {
+                                                const indexA = typeOrder.indexOf(a);
+                                                const indexB = typeOrder.indexOf(b);
+                                                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                                                if (indexA !== -1) return -1;
+                                                if (indexB !== -1) return 1;
+                                                return a.localeCompare(b);
+                                            });
 
                                             return (
                                                 <select
@@ -212,7 +238,7 @@ export default function Wardrobe() {
                                                     }
                                                     className="w-full h-12 px-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai bg-surface transition-all appearance-none font-medium"
                                                 >
-                                                    {Object.keys(groupedCategories).map((type) => (
+                                                    {sortedGroups.map((type) => (
                                                         <optgroup key={type} label={translateType[type] || type} className="font-bold bg-white">
                                                             {groupedCategories[type].map((cat) => (
                                                                 <option key={cat.id} value={cat.id} className="font-medium">
@@ -348,9 +374,19 @@ export default function Wardrobe() {
                                     onChange={(e) => setEditFormData({ ...editFormData, category_id: e.target.value })}
                                     className="w-full h-12 px-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai text-primary appearance-none font-medium"
                                 >
-                                    {categories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                    ))}
+                                    {/* reuse same sort logic for consistency */}
+                                    {[...categories]
+                                        .sort((a, b) => {
+                                            const aIsOther = a.name.includes("Khác") || a.name.includes("Other");
+                                            const bIsOther = b.name.includes("Khác") || b.name.includes("Other");
+                                            if (aIsOther && !bIsOther) return 1;
+                                            if (!aIsOther && bIsOther) return -1;
+                                            return a.name.localeCompare(b.name, 'vi', { sensitivity: 'base' });
+                                        })
+                                        .map((cat) => (
+                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                        ))
+                                    }
                                 </select>
                             </div>
 

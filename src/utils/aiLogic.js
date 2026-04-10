@@ -28,7 +28,7 @@ export const suggestOutfitsWithLLM = async (
             id: item.id,
             name: item.categories?.name,
             type: item.categories?.type, // Tops, Bottoms, Footwear, Outerwear...
-            hex_color: item.color_hex, // AI có thể phân tích sắc thái màu qua mã HEX
+            hex_color: item.color_hex,
             weather: item.weather_suitability,
         }));
 
@@ -50,16 +50,20 @@ export const suggestOutfitsWithLLM = async (
 
             NHIỆM VỤ: Hãy chọn đồ từ Tủ Đồ và phối CHÍNH XÁC 2 bộ trang phục (outfit) khác nhau.
 
-            YÊU CẦU LOGIC:
-            1. Mỗi outfit PHẢI CÓ đủ phần thân trên (Tops) và thân dưới (Bottoms). Có thể thêm áo khoác (Outerwear) và giày (Footwear) nếu thời tiết/phong cách phù hợp.
-            2. Màu sắc (hex_color) phải matching với nhau (ví dụ: bánh xe màu sắc, đơn sắc, tương phản) và tôn được Tông da. Dáng áo/quần phải che được khuyết điểm Dáng người.
-            3. KHÔNG bịa ra đồ không có trong mã Tủ đồ JSON. KHÔNG lặp lại một món đồ ở cả 2 bộ nếu tủ đồ đủ rộng.
-            4. Viết 1 lý do (reason) cực kỳ súc tích giải thích tại sao bộ này hợp với hoàn cảnh, thời tiết và cơ thể.
+            YÊU CẦU TỐI THƯỢNG (PHẢI TUÂN THỦ):
+            1. CẤU TRÚC BẮT BUỘC: Mỗi outfit PHẢI CÓ ÍT NHẤT 1 món loại "Tops" (Áo mặc trong như áo thun, sơ mi) VÀ 1 món loại "Bottoms" (Quần hoặc Váy).
+            2. QUY TẮC OUTERWEAR: Áo khoác (Outerwear) là tùy chọn thêm. Tuyệt đối KHÔNG ĐƯỢC dùng "Outerwear" để thay thế cho "Tops". Một bộ đồ chỉ có Áo khoác và Quần mà không có áo thun/sơ mi bên trong là SAI quy tắc.
+            3. PHỐI HỢP THÊM: Có thể mix thêm Giày (Footwear) và Phụ kiện (Accessories) để hoàn thiện bộ đồ.
+            
+            YÊU CẦU LOGIC KHÁC:
+            - Màu sắc (hex_color) phải phối hợp hài hòa (bánh xe màu sắc, tương phản hoặc đơn sắc).
+            - KHÔNG bịa ra đồ không có trong mã Tủ đồ JSON. KHÔNG lặp lại một món đồ ở cả 2 bộ nếu tủ đồ đủ rộng.
+            - Viết 1 lý do (reason) cực kỳ chuyên nghiệp giải thích tại sao bộ này hợp với hoàn cảnh, thời tiết và cơ thể.
             
             SCHEMA OUTPUT BẮT BUỘC (Trả về mảng JSON đúng sơ đồ sau):
             [
               {
-                "name": "Tên concept ngắn gọn (VD: Thanh lịch mùa thu)",
+                "name": "Tên concept ngắn gọn",
                 "reason": "Lý do súc tích dưới 40 chữ",
                 "itemIds": ["id1", "id2", "id3"]
               }
@@ -72,12 +76,24 @@ export const suggestOutfitsWithLLM = async (
         // Vì đã set responseMimeType là application/json, text trả về mặc định là JSON sạch.
         const aiSuggestions = JSON.parse(responseText);
 
-        // 5. Build dữ liệu trả về cho UI
+        // 5. Build dữ liệu trả về cho UI & Validation Check
         const finalOutfits = aiSuggestions
             .map((suggestion) => {
                 const items = suggestion.itemIds
                     .map((id) => wardrobe.find((w) => w.id === id))
-                    .filter(Boolean); // Lọc id sai lệch
+                    .filter(Boolean); // Lọc các ID không tồn tại
+
+                // BƯỚC VALIDATION: Kiểm tra tính hợp lệ của outfit
+                // 1. Phải có ít nhất 1 áo mặc trong (Tops)
+                const hasInnerTop = items.some(i => i.categories?.type === "Tops");
+                // 2. Phải có ít nhất 1 quần/váy (Bottoms)
+                const hasBottom = items.some(i => i.categories?.type === "Bottoms");
+
+                // Nếu thiếu 1 trong 2 thành phần cốt lõi, loại bỏ outfit này ngay lập tức
+                if (!hasInnerTop || !hasBottom) {
+                    console.warn(`Outfit "${suggestion.name}" bị loại vì thiếu Tops hoặc Bottoms.`);
+                    return null;
+                }
 
                 return {
                     id: Date.now() + Math.random(),
@@ -86,7 +102,7 @@ export const suggestOutfitsWithLLM = async (
                     items: items,
                 };
             })
-            .filter((o) => o.items.length >= 2);
+            .filter(Boolean); // Loại bỏ các outfit null do không pass bước validation
 
         return finalOutfits;
     } catch (error) {
@@ -181,7 +197,10 @@ export const analyzeClothingImage = async (imagePart, categoriesList) => {
             YÊU CẦU:
             1. PHÂN LOẠI TRANG PHỤC: Nhận diện loại trang phục trong ảnh. Đối chiếu với danh sách các loại trang phục (Categories) sau đây:
             ${JSON.stringify(simplifiedCategories)}
-            Hãy tìm ra "id" của loại trang phục khớp nhất hoặc gần giống nhất với ảnh.
+            QUY TẮC PHÂN LOẠI:
+            - Tìm ra "id" của loại trang phục khớp nhất hoặc gần giống nhất với ảnh.
+            - HẠN CHẾ TỐI ĐA việc chọn các category có tên chứa "(Khác)" hoặc "Khác" trừ khi không còn lựa chọn nào khác phù hợp hơn. Ví dụ: Nếu là Áo thun thì PHẢI chọn Áo thun, không được chọn Áo (Khác).
+            - Phân tích kỹ kiểu dáng (cổ áo, tay áo, độ dài) để đưa ra quyết định chính xác nhất.
 
             2. NHẬN DIỆN MÀU SẮC CHỦ ĐẠO: Phân tích màu sắc chính của trang phục. Đối chiếu với danh sách bảng màu sau:
             ${JSON.stringify(PREDEFINED_COLORS)}

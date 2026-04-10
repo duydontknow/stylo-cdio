@@ -45,8 +45,8 @@ export default function Dashboard() {
         currentHour < 12
             ? "Chào buổi sáng"
             : currentHour < 18
-              ? "Chào buổi chiều"
-              : "Chào buổi tối";
+                ? "Chào buổi chiều"
+                : "Chào buổi tối";
 
     const { weather } = useWeather();
     const [stats, setStats] = useState({ clothes: 0, outfits: 0 });
@@ -72,7 +72,7 @@ export default function Dashboard() {
     if (loading) return <DashboardSkeleton />;
 
     return (
-        <motion.div 
+        <motion.div
             className="max-w-5xl mx-auto space-y-8"
             variants={containerVariants}
             initial="hidden"
@@ -88,10 +88,10 @@ export default function Dashboard() {
 
             {/* Bento Grid layout */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
+
                 {/* Stats Card - Quần áo */}
-                <motion.div 
-                    variants={itemVariants} 
+                <motion.div
+                    variants={itemVariants}
                     whileHover={{ scale: 1.02 }}
                     className="bg-surface p-6 rounded-3xl border border-gray-100 shadow-glass flex flex-col justify-between"
                 >
@@ -107,7 +107,7 @@ export default function Dashboard() {
                 </motion.div>
 
                 {/* Stats Card - Outfits */}
-                <motion.div 
+                <motion.div
                     variants={itemVariants}
                     whileHover={{ scale: 1.02 }}
                     className="bg-surface p-6 rounded-3xl border border-gray-100 shadow-glass flex flex-col justify-between"
@@ -124,7 +124,7 @@ export default function Dashboard() {
                 </motion.div>
 
                 {/* Khối Thời tiết (Glassmorphism + Gradient) */}
-                <motion.div 
+                <motion.div
                     variants={itemVariants}
                     className="col-span-1 md:col-span-1 bg-gradient-to-br from-ai to-purple-800 p-6 rounded-3xl shadow-glow text-white relative overflow-hidden flex flex-col justify-between"
                 >
@@ -161,7 +161,7 @@ export default function Dashboard() {
                                 Hãy bắt đầu số hóa tủ đồ của bạn bằng cách thêm những chiếc áo, chiếc quần yêu thích nhất.
                             </p>
                             <Link to="/wardrobe">
-                                <Button variant="secondary" size="lg" leftIcon={<Plus className="w-5 h-5"/>}>
+                                <Button variant="secondary" size="lg" leftIcon={<Plus className="w-5 h-5" />}>
                                     Thêm trang phục đầu tiên
                                 </Button>
                             </Link>
@@ -179,7 +179,7 @@ export default function Dashboard() {
                                 Hãy để AI phân tích <span className="text-white font-semibold">{stats.clothes} món đồ</span> trong tủ và chọn ra trang phục hoàn hảo nhất cho bạn.
                             </p>
                             <Link to="/ai-stylist">
-                                <Button variant="secondary" size="lg" className="px-8 shadow-glow" leftIcon={<Sparkles className="w-5 h-5"/>}>
+                                <Button variant="secondary" size="lg" className="px-8 shadow-glow" leftIcon={<Sparkles className="w-5 h-5" />}>
                                     Trải nghiệm AI Stylist
                                 </Button>
                             </Link>

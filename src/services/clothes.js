@@ -4,7 +4,10 @@ import { processBackgroundRemoval } from "../utils/removeBg";
 
 // Lấy danh sách danh mục (để đưa vào dropdown chọn loại áo)
 export const getCategories = async () => {
-    const { data, error } = await supabase.from("categories").select("*");
+    const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("name");
     if (error) throw error;
     return data;
 };
