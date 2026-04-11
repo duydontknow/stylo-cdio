@@ -14,14 +14,14 @@ import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
 
 const PREDEFINED_COLORS = [
-    "#000000", "#ffffff", "#9ca3af", "#fef3c7", 
-    "#8b4513", "#1e3a8a", "#3b82f6", "#ef4444", 
+    "#000000", "#ffffff", "#9ca3af", "#fef3c7",
+    "#8b4513", "#1e3a8a", "#3b82f6", "#ef4444",
     "#22c55e", "#ec4899", "#eab308", "#8B5CF6"
 ];
 
 export default function Wardrobe() {
     const { user } = useAuth();
-    
+
     const {
         clothes,
         categories,
@@ -41,6 +41,7 @@ export default function Wardrobe() {
         category_id: "",
         color_hex: "#ffffff",
         weather_suitability: "All",
+        description: "",
     });
 
     // Edit Modal states
@@ -49,6 +50,7 @@ export default function Wardrobe() {
         category_id: "",
         color_hex: "#ffffff",
         weather_suitability: "All",
+        description: "",
     });
 
     // Initialize default category when categories jump in
@@ -77,6 +79,7 @@ export default function Wardrobe() {
             category_id: currentCategoryId || (categories.length > 0 ? categories[0].id : ""),
             color_hex: item.color_hex || "#ffffff",
             weather_suitability: item.weather_suitability || "All",
+            description: item.description || "",
         });
     };
 
@@ -98,9 +101,9 @@ export default function Wardrobe() {
                     </h1>
                     <p className="text-muted font-bold mt-1">Đang có {clothes.length} món đồ</p>
                 </div>
-                
-                <Button 
-                    variant="primary" 
+
+                <Button
+                    variant="primary"
                     onClick={() => setShowForm(!showForm)}
                     leftIcon={showForm ? <ImageMinus size={20} /> : <Plus size={20} />}
                 >
@@ -159,17 +162,18 @@ export default function Wardrobe() {
                                         const selectedFile = e.target.files[0];
                                         if (!selectedFile) return;
                                         setFile(selectedFile);
-                                        
+
                                         try {
                                             setIsAnalyzingImage(true);
                                             const imagePart = await fileToGenerativePart(selectedFile);
                                             const aiResult = await analyzeClothingImage(imagePart, categories);
-                                            
+
                                             if (aiResult?.category_id && aiResult?.color_hex) {
                                                 setFormData(prev => ({
                                                     ...prev,
                                                     category_id: aiResult.category_id,
-                                                    color_hex: aiResult.color_hex
+                                                    color_hex: aiResult.color_hex,
+                                                    description: aiResult.description || ""
                                                 }));
                                                 toast.success("AI đã nhận diện xong!");
                                             }
@@ -212,10 +216,10 @@ export default function Wardrobe() {
 
                                             const typeOrder = ["Tops", "Bottoms", "Outerwear", "Footwear", "Accessories", "Khác"];
                                             const translateType = {
-                                                Tops: "CÁC LOẠI ÁO", 
-                                                Bottoms: "QUẦN & VÁY", 
-                                                Outerwear: "ÁO KHOÁC", 
-                                                Footwear: "GIÀY DÉP", 
+                                                Tops: "CÁC LOẠI ÁO",
+                                                Bottoms: "QUẦN & VÁY",
+                                                Outerwear: "ÁO KHOÁC",
+                                                Footwear: "GIÀY DÉP",
                                                 Accessories: "PHỤ KIỆN",
                                                 Khác: "KHÁC",
                                             };
@@ -240,11 +244,20 @@ export default function Wardrobe() {
                                                 >
                                                     {sortedGroups.map((type) => (
                                                         <optgroup key={type} label={translateType[type] || type} className="font-bold bg-white">
-                                                            {groupedCategories[type].map((cat) => (
-                                                                <option key={cat.id} value={cat.id} className="font-medium">
-                                                                    {cat.name}
-                                                                </option>
-                                                            ))}
+                                                            {[...groupedCategories[type]]
+                                                                .sort((a, b) => {
+                                                                    const aIsOther = a.name.includes("Khác") || a.name.includes("Không xác định") || a.name.includes("Other");
+                                                                    const bIsOther = b.name.includes("Khác") || b.name.includes("Không xác định") || b.name.includes("Other");
+                                                                    if (aIsOther && !bIsOther) return 1;
+                                                                    if (!aIsOther && bIsOther) return -1;
+                                                                    return a.name.localeCompare(b.name, 'vi', { sensitivity: 'base' });
+                                                                })
+                                                                .map((cat) => (
+                                                                    <option key={cat.id} value={cat.id} className="font-medium">
+                                                                        {cat.name}
+                                                                    </option>
+                                                                ))
+                                                            }
                                                         </optgroup>
                                                     ))}
                                                 </select>
@@ -306,6 +319,18 @@ export default function Wardrobe() {
                                     </div>
                                 </div>
 
+                                {/* Ô nhập Mô tả chi tiết */}
+                                <div>
+                                    <label className="block text-sm font-semibold mb-2 text-primary pl-1">Mô tả đặc điểm (Ví dụ: cổ tim, họa tiết sọc...)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Để trống nếu không có đặc điểm gì đặc biệt"
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        className="w-full h-12 px-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai bg-white transition-all font-medium placeholder:text-gray-300"
+                                    />
+                                </div>
+
                                 <Button
                                     type="submit"
                                     isLoading={isUploading}
@@ -324,7 +349,7 @@ export default function Wardrobe() {
             {clothes.length === 0 && !showForm ? (
                 <WardrobeEmptyState onAction={() => setShowForm(true)} />
             ) : (
-                <motion.div 
+                <motion.div
                     layout
                     className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"
                 >
@@ -394,7 +419,7 @@ export default function Wardrobe() {
                                 <div className="col-span-2 sm:col-span-1 text-left">
                                     <label className="block text-sm font-semibold mb-2 text-primary">Chỉnh màu</label>
                                     <div className="flex flex-wrap gap-2 mb-3">
-                                        {PREDEFINED_COLORS.slice(0,8).map(color => (
+                                        {PREDEFINED_COLORS.slice(0, 8).map(color => (
                                             <button
                                                 key={color}
                                                 type="button"
@@ -425,6 +450,17 @@ export default function Wardrobe() {
                                         <option value="Cold">Mùa Đông</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold mb-2 text-primary text-left">Đặc điểm món đồ</label>
+                                <input
+                                    type="text"
+                                    placeholder="Miêu tả chi tiết..."
+                                    value={editFormData.description}
+                                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                                    className="w-full h-12 px-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai text-primary transition-all font-medium"
+                                />
                             </div>
                         </div>
 

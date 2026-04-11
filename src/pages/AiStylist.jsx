@@ -119,7 +119,7 @@ export default function AiStylist() {
             <div className="absolute top-40 left-10 w-80 h-80 bg-blue-400/10 rounded-full blur-[100px] pointer-events-none" />
 
             {/* Header */}
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center relative z-10"
@@ -128,7 +128,7 @@ export default function AiStylist() {
                     <Sparkles size={28} />
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight">
-                    AI Stylist Chuyên Nghiệp
+                    AI Stylist
                 </h1>
                 <p className="text-muted mt-3 text-lg font-medium">
                     Hãy để trí tuệ nhân tạo chọn ra trang phục hoàn hảo nhất cho bạn hôm nay.
@@ -136,7 +136,7 @@ export default function AiStylist() {
             </motion.div>
 
             {/* AI Control Box (Glassmorphism) */}
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -224,7 +224,7 @@ export default function AiStylist() {
             {/* Scanner / Loading Animation */}
             <AnimatePresence>
                 {isGenerating && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
@@ -243,7 +243,7 @@ export default function AiStylist() {
             </AnimatePresence>
 
             {/* Hiển thị kết quả AI */}
-            <motion.div 
+            <motion.div
                 className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10"
                 variants={containerVariants}
                 initial="hidden"
@@ -269,8 +269,8 @@ export default function AiStylist() {
 
                             <div className="flex flex-wrap gap-4 mb-6">
                                 {outfit.items.map((item) => (
-                                    <motion.div 
-                                        key={item.id} 
+                                    <motion.div
+                                        key={item.id}
                                         whileHover={{ y: -5 }}
                                         className="text-center relative"
                                     >
@@ -283,9 +283,9 @@ export default function AiStylist() {
                                         </div>
                                         {/* Color Dot Indicator */}
                                         <div className="absolute -bottom-2 -left-2 bg-white flex items-center justify-center p-1.5 rounded-full shadow-sm border border-gray-100">
-                                            <div 
-                                                className="w-4 h-4 rounded-full border border-gray-200" 
-                                                style={{backgroundColor: item.color_hex}}
+                                            <div
+                                                className="w-4 h-4 rounded-full border border-gray-200"
+                                                style={{ backgroundColor: item.color_hex }}
                                                 title={item.color_hex}
                                             />
                                         </div>

@@ -131,7 +131,7 @@ export default function Outfits() {
     const [formData, setFormData] = useState({
         name: "",
         weather_suitability: "All",
-        selectedClothes: [], 
+        selectedClothes: [],
     });
 
     const [activeDragItem, setActiveDragItem] = useState(null);
@@ -285,9 +285,9 @@ export default function Outfits() {
                             Phối bằng AI
                         </Button>
                     </Link>
-                    <Button 
-                        variant="primary" 
-                        leftIcon={<Plus size={18} />} 
+                    <Button
+                        variant="primary"
+                        leftIcon={<Plus size={18} />}
                         onClick={openCreateModal}
                         className="flex-1 sm:flex-none"
                     >
@@ -298,7 +298,7 @@ export default function Outfits() {
 
             {/* Content */}
             {outfits.length === 0 ? (
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                     className="text-center py-24 bg-surface rounded-[2rem] border border-dashed border-gray-300 flex flex-col items-center shadow-glass"
                 >
@@ -316,7 +316,7 @@ export default function Outfits() {
                     </div>
                 </motion.div>
             ) : (
-                <motion.div 
+                <motion.div
                     layout
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 md:gap-8"
                 >
@@ -404,7 +404,7 @@ export default function Outfits() {
                 title={editingOutfit ? "Sửa bộ trang phục" : "Stylist Bàn Vẽ"}
                 size="full" /* size lớn kịch kim dành riêng cho Dnd */
                 className="max-w-5xl h-[85vh] flex flex-col"
-                bodyClassName="flex-1 p-0 flex flex-col overflow-hidden" 
+                bodyClassName="flex-1 p-0 flex flex-col overflow-hidden"
             >
                 <DndContext
                     collisionDetection={pointerWithin}
@@ -453,12 +453,12 @@ export default function Outfits() {
 
                                     <DroppableCanvas selectedClothesCount={formData.selectedClothes.length}>
                                         {formData.selectedClothes.map((cloth) => (
-                                            <motion.div 
+                                            <motion.div
                                                 layout
                                                 initial={{ scale: 0.8, opacity: 0 }}
                                                 animate={{ scale: 1, opacity: 1 }}
                                                 exit={{ scale: 0.8, opacity: 0 }}
-                                                key={cloth.id} 
+                                                key={cloth.id}
                                                 className="relative w-[110px] aspect-[3/4] group shadow-sm rounded-2xl overflow-hidden bg-white border border-gray-100 p-1.5"
                                             >
                                                 <img
@@ -510,7 +510,7 @@ export default function Outfits() {
                                     Kéo & Thả
                                 </Badge>
                             </div>
-                            
+
                             {/* Grid */}
                             <div className="p-5 overflow-y-auto custom-scrollbar flex-1 bg-gray-50/50 inset-shadow-sm">
                                 <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-5 pb-10">

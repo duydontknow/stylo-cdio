@@ -67,6 +67,7 @@ export const addCloth = async (file, clothData) => {
                     image_url: imageUrl,
                     color_hex: clothData.color_hex,
                     weather_suitability: clothData.weather_suitability,
+                    description: clothData.description,
                 },
             ])
             .select();
