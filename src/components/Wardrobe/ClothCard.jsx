@@ -1,9 +1,11 @@
 import { RefreshCcw, Edit, Trash2, Droplets } from "lucide-react";
 import { motion } from "framer-motion";
 import Badge from "../common/Badge";
+import { useTheme } from "../../contexts/ThemeContext";
 
 export function ClothCard({ item, handleToggleStatus, openEditModal, handleDelete }) {
     const isWashing = item.status === "Washing";
+    const { isDark } = useTheme();
 
     return (
         <motion.div 
@@ -42,13 +44,20 @@ export function ClothCard({ item, handleToggleStatus, openEditModal, handleDelet
                 </div>
             </div>
 
-            <div className={`aspect-[3/4] bg-gray-50 relative overflow-hidden p-2`}>
+            {/* Image container:
+                - Light mode: bg-gray-50 (kem nhạt) + mix-blend-multiply → nền sạch, xóa phông tốt
+                - Dark mode : bg-white      (trắng)    + mix-blend-multiply → giữ nguyên hiệu ứng
+                Không dùng CSS override vì bg-gray-50 bị ghi đè global thành đen trong dark mode */}
+            <div
+                className="aspect-[3/4] relative overflow-hidden p-2"
+                style={{ backgroundColor: isDark ? "#ffffff" : "#f9fafb" }}
+            >
                 <div className="w-full h-full rounded-2xl overflow-hidden relative">
                     <img
                         src={item.image_url}
                         alt="Trang phục"
-                        className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${
-                            isWashing ? "grayscale opacity-50 mix-blend-multiply" : "mix-blend-multiply"
+                        className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 mix-blend-multiply ${
+                            isWashing ? "grayscale opacity-50" : ""
                         }`}
                     />
                 </div>
@@ -63,7 +72,8 @@ export function ClothCard({ item, handleToggleStatus, openEditModal, handleDelet
                 </div>
             </div>
 
-            <div className="p-4 flex items-start justify-between bg-white relative z-0">
+            {/* Info bar dưới — dùng bg-surface thay vì bg-white để dark mode tự override */}
+            <div className="p-4 flex items-start justify-between bg-surface relative z-0">
                 <div className="flex-1 overflow-hidden pr-2">
                     <p className="font-bold text-[15px] truncate text-primary">{item.categories?.name}</p>
                     <p className="text-xs font-medium text-muted mt-0.5">
@@ -72,7 +82,7 @@ export function ClothCard({ item, handleToggleStatus, openEditModal, handleDelet
                     </p>
                 </div>
                 {/* Color Dot Indicator */}
-                <div className="bg-white p-1 rounded-full shadow-sm border border-gray-100 flex-shrink-0">
+                <div className="bg-surface p-1 rounded-full shadow-sm border border-gray-100 flex-shrink-0">
                     <div 
                         className="w-5 h-5 rounded-full border border-gray-200" 
                         style={{backgroundColor: item.color_hex}}

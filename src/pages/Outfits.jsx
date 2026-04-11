@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 import {
     getUserOutfits,
     deleteOutfit,
@@ -43,6 +44,7 @@ function DraggableItem({ cloth, isSelected }) {
             id: cloth.id,
             data: { cloth },
         });
+    const { isDark } = useTheme();
 
     const style = {
         transform: CSS.Translate.toString(transform),
@@ -57,12 +59,13 @@ function DraggableItem({ cloth, isSelected }) {
             style={style}
             {...listeners}
             {...attributes}
-            className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing border-[3px] transition-all duration-200 bg-white shadow-sm ${isSelected
+            className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing border-[3px] transition-all duration-200 shadow-sm ${isSelected
                 ? "border-ai shadow-glow opacity-80"
                 : "border-transparent hover:border-gray-200 hover:shadow-md"
                 }`}
         >
-            <div className="w-full h-full bg-gray-50/50 p-2">
+            {/* bg luôn trắng để mix-blend-multiply hoạt động */}
+            <div className="w-full h-full p-2" style={{ backgroundColor: '#ffffff' }}>
                 <img
                     src={cloth.image_url}
                     alt="Cloth"
@@ -372,7 +375,8 @@ export default function Outfits() {
                                             <motion.div
                                                 whileHover={{ scale: 1.05 }}
                                                 key={itemObj.clothes.id}
-                                                className="relative aspect-[3/4] rounded-[1rem] overflow-hidden shadow-sm bg-white border border-gray-100 p-1"
+                                                className="relative aspect-[3/4] rounded-[1rem] overflow-hidden shadow-sm border border-gray-100 p-1"
+                                                style={{ backgroundColor: '#ffffff' }}
                                             >
                                                 <img
                                                     src={itemObj.clothes.image_url}
@@ -459,7 +463,8 @@ export default function Outfits() {
                                                 animate={{ scale: 1, opacity: 1 }}
                                                 exit={{ scale: 0.8, opacity: 0 }}
                                                 key={cloth.id}
-                                                className="relative w-[110px] aspect-[3/4] group shadow-sm rounded-2xl overflow-hidden bg-white border border-gray-100 p-1.5"
+                                                className="relative w-[110px] aspect-[3/4] group shadow-sm rounded-2xl overflow-hidden border border-gray-100 p-1.5"
+                                                style={{ backgroundColor: '#ffffff' }}
                                             >
                                                 <img
                                                     src={cloth.image_url}
@@ -534,7 +539,7 @@ export default function Outfits() {
 
                     <DragOverlay>
                         {activeDragItem ? (
-                            <div className="w-[120px] aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl opacity-90 cursor-grabbing bg-white border-2 border-ai/50 transform scale-105 p-1.5">
+                            <div className="w-[120px] aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl opacity-90 cursor-grabbing border-2 border-ai/50 transform scale-105 p-1.5" style={{ backgroundColor: '#ffffff' }}>
                                 <img src={activeDragItem.image_url} alt="Drag" className="w-full h-full object-cover rounded-xl mix-blend-multiply" />
                             </div>
                         ) : null}

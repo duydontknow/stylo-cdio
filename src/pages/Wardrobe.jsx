@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useWardrobe } from "../hooks/useWardrobe";
+import { useTheme } from "../contexts/ThemeContext";
 import { ClothCard } from "../components/Wardrobe/ClothCard";
 import { WardrobeSkeleton } from "../components/common/Skeletons";
 import { WardrobeEmptyState } from "../components/common/EmptyStates";
@@ -21,6 +22,7 @@ const PREDEFINED_COLORS = [
 
 export default function Wardrobe() {
     const { user } = useAuth();
+    const { isDark } = useTheme();
 
     const {
         clothes,
@@ -134,7 +136,10 @@ export default function Wardrobe() {
                                     </div>
                                 )}
                                 {file ? (
-                                    <div className="w-full h-full p-4 flex items-center justify-center">
+                                    <div
+                                        className="w-full h-full p-4 flex items-center justify-center"
+                                        style={{ backgroundColor: isDark ? '#ffffff' : 'transparent' }}
+                                    >
                                         <img
                                             src={URL.createObjectURL(file)}
                                             alt="Preview"
@@ -321,13 +326,12 @@ export default function Wardrobe() {
 
                                 {/* Ô nhập Mô tả chi tiết */}
                                 <div>
-                                    <label className="block text-sm font-semibold mb-2 text-primary pl-1">Mô tả đặc điểm (Ví dụ: cổ tim, họa tiết sọc...)</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Để trống nếu không có đặc điểm gì đặc biệt"
+                                    <label className="block text-sm font-semibold mb-2 text-primary pl-1">Đặc điểm & Chi tiết (Do AI tự nhập hoặc tự điền)</label>
+                                    <textarea
+                                        placeholder="Ví dụ: Áo thun Oversize chất cotton mềm, cổ tròn, họa tiết in graphic..."
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        className="w-full h-12 px-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai bg-white transition-all font-medium placeholder:text-gray-300"
+                                        className="w-full min-h-[100px] p-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai bg-white transition-all font-medium placeholder:text-gray-300 resize-none"
                                     />
                                 </div>
 
@@ -378,7 +382,8 @@ export default function Wardrobe() {
                     <div className="space-y-6">
                         {/* Preview Ảnh Nhỏ */}
                         <div className="flex gap-4 items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                            <div className="w-[72px] h-[88px] bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-shrink-0">
+                            {/* bg luôn trắng để mix-blend-multiply hoạt động đúng cả light & dark */}
+                            <div className="w-[72px] h-[88px] rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-shrink-0" style={{ backgroundColor: '#ffffff' }}>
                                 <img
                                     src={editingCloth.image_url}
                                     className="w-full h-full object-cover mix-blend-multiply"
@@ -454,12 +459,11 @@ export default function Wardrobe() {
 
                             <div>
                                 <label className="block text-sm font-semibold mb-2 text-primary text-left">Đặc điểm món đồ</label>
-                                <input
-                                    type="text"
+                                <textarea
                                     placeholder="Miêu tả chi tiết..."
                                     value={editFormData.description}
                                     onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                                    className="w-full h-12 px-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai text-primary transition-all font-medium"
+                                    className="w-full min-h-[100px] p-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ai text-primary transition-all font-medium resize-none"
                                 />
                             </div>
                         </div>

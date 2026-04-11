@@ -63,12 +63,12 @@ export default function Dashboard() {
                     getUserOutfits(user.id),
                     getProfile(user.id),
                 ]);
-                
+
                 setStats({ clothes: clothes.length, outfits: outfits.length });
-                
+
                 const isComplete = !!(profile?.height && profile?.weight && profile?.body_shape && profile?.skin_tone);
                 setProfileStatus({ isComplete, data: profile });
-                
+
             } catch (error) {
                 console.error("Lỗi tải dữ liệu", error);
             } finally {
@@ -159,14 +159,14 @@ export default function Dashboard() {
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ scale: 1.02 }}
-                    className={`col-span-1 md:col-span-2 lg:col-span-4 p-6 rounded-3xl border border-gray-100 shadow-glass overflow-hidden relative flex flex-col md:flex-row items-center justify-between gap-6 ${
-                        profileStatus.isComplete ? "bg-surface" : "bg-gradient-to-r from-ai/5 to-purple-50"
-                    }`}
+                    className={`col-span-1 md:col-span-2 lg:col-span-4 p-6 rounded-3xl border border-gray-100 shadow-glass overflow-hidden relative flex flex-col md:flex-row items-center justify-between gap-6 ${profileStatus.isComplete
+                            ? "bg-surface"
+                            : "bg-gradient-to-r from-ai/5 to-purple-50 dark:from-ai/10 dark:to-slate-900"
+                        }`}
                 >
                     <div className="flex items-center gap-6 relative z-10">
-                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${
-                            profileStatus.isComplete ? "bg-green-50 text-green-600" : "bg-ai/10 text-ai"
-                        }`}>
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${profileStatus.isComplete ? "bg-green-50 text-green-600" : "bg-ai/10 text-ai"
+                            }`}>
                             <User className="w-7 h-7" />
                         </div>
                         <div>
@@ -174,17 +174,17 @@ export default function Dashboard() {
                                 {profileStatus.isComplete ? "Hồ sơ đã hoàn tất" : "Cá nhân hóa gợi ý"}
                             </h3>
                             <p className="text-muted text-sm max-w-md">
-                                {profileStatus.isComplete 
-                                    ? "AI đang sử dụng chỉ số cơ thể của bạn để đưa ra những gợi ý phù hợp nhất." 
+                                {profileStatus.isComplete
+                                    ? "AI đang sử dụng chỉ số cơ thể của bạn để đưa ra những gợi ý phù hợp nhất."
                                     : "Cập nhật chỉ số cơ thể và phong cách để AI có thể đưa ra những gợi ý trang phục chuẩn xác hơn cho riêng bạn."}
                             </p>
                         </div>
                     </div>
-                    
+
                     <Link to="/profile" className="relative z-10 group shrink-0">
-                        <Button 
-                            variant={profileStatus.isComplete ? "outline" : "primary"} 
-                            size="sm" 
+                        <Button
+                            variant={profileStatus.isComplete ? "outline" : "primary"}
+                            size="sm"
                             className="pr-2"
                             rightIcon={<ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
                         >
@@ -208,7 +208,7 @@ export default function Dashboard() {
                     <div className="relative bg-primary rounded-[2rem] p-8 md:p-12 text-center text-white shadow-soft overflow-hidden">
                         <div className="relative z-10">
                             <h2 className="text-2xl md:text-3xl font-bold mb-4">Tủ đồ của bạn đang trống!</h2>
-                            <p className="text-muted mb-8 max-w-md mx-auto">
+                            <p className="text-muted dark:text-slate-300 mb-8 max-w-md mx-auto">
                                 Hãy bắt đầu số hóa tủ đồ của bạn bằng cách thêm những chiếc áo, chiếc quần yêu thích nhất.
                             </p>
                             <Link to="/wardrobe">

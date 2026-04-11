@@ -1,0 +1,56 @@
+{
+    "nav": {
+        "dashboard": "Tổng quan",
+        "wardrobe": "Tủ đồ",
+        "outfits": "Phối đồ",
+        "ai_stylist": "AI Stylist",
+        "profile": "Hồ sơ",
+        "logout": "Đăng xuất"
+    },
+    "common": {
+        "loading": "Đang tải...",
+        "error": "Có lỗi xảy ra",
+        "save": "Lưu",
+        "cancel": "Hủy",
+        "delete": "Xóa",
+        "edit": "Sửa",
+        "add": "Thêm",
+        "close": "Đóng",
+        "confirm": "Xác nhận",
+        "search": "Tìm kiếm...",
+        "all": "Tất cả",
+        "hot": "Mùa hè",
+        "cold": "Mùa đông",
+        "four_seasons": "Bốn mùa"
+    },
+    "dashboard": {
+        "title": "Tổng quan",
+        "subtitle": "Chào mừng bạn quay trở lại!",
+        "wardrobe_stats": "Đang có {{count}} món đồ",
+        "outfit_stats": "Đã tạo {{count}} bộ phối đồ",
+        "recommended_outfit": "Gợi ý trang phục hôm nay",
+        "add_new": "Thêm đồ mới"
+    },
+    "wardrobe": {
+        "title": "Tủ đồ của tôi",
+        "subtitle": "Đang có {{count}} món đồ",
+        "add_new": "Thêm đồ mới",
+        "close_form": "Đóng form",
+        "category": "Loại trang phục",
+        "color": "Màu sắc chính",
+        "weather": "Thời tiết gợi ý",
+        "description": "Mô tả đặc điểm",
+        "upload_image": "Tải ảnh trang phục lên",
+        "ai_analyzing": "AI đang tách nền & phân tích...",
+        "save_to_wardrobe": "Lưu vào Tủ Đồ"
+    },
+    "outfits": {
+        "title": "Bộ sưu tập Outfit",
+        "subtitle": "Tổng cộng {{count}} bộ trang phục đã được lưu",
+        "ai_mix": "Phối bằng AI",
+        "free_mix": "Tạo tự do",
+        "empty_state": "Tủ áo của bạn trống trải quá",
+        "empty_state_suggestion": "Bắt đầu ngay bằng việc nhờ AI gợi ý một vài bộ đồ chuẩn trend, hoặc tự Mix & Match The Look của riêng bạn.",
+        "mix_now": "Phối đồ ngay"
+    }
+}

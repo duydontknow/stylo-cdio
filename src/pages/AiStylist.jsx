@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 import { getUserClothes } from "../services/clothes";
 import { createOutfit } from "../services/outfits";
 import { suggestOutfitsWithLLM } from "../utils/aiLogic";
@@ -47,6 +48,7 @@ const outfitVariants = {
 
 export default function AiStylist() {
     const { user } = useAuth();
+    const { isDark } = useTheme();
     const [wardrobe, setWardrobe] = useState([]);
     const [loading, setLoading] = useState(true);
     const [suggestedOutfits, setSuggestedOutfits] = useState([]);
@@ -274,7 +276,10 @@ export default function AiStylist() {
                                         whileHover={{ y: -5 }}
                                         className="text-center relative"
                                     >
-                                        <div className="w-[104px] h-[132px] rounded-[1.25rem] overflow-hidden shadow-sm border border-gray-100/50 bg-gray-50 bg-opacity-50">
+                                        <div 
+                                            className="w-[104px] h-[132px] rounded-[1.25rem] overflow-hidden shadow-sm border border-gray-100/50"
+                                            style={{ backgroundColor: '#ffffff' }}
+                                        >
                                             <img
                                                 src={item.image_url}
                                                 className="w-full h-full object-cover mix-blend-multiply"

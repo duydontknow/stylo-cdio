@@ -11,7 +11,60 @@ import {
     Menu,
     User,
     X,
+    Sun,
+    Moon,
 } from "lucide-react";
+import { useTheme } from "../../contexts/ThemeContext";
+
+// Nút toggle Dark/Light mode với animation mượt
+function ThemeToggleButton({ compact = false }) {
+    const { isDark, toggleTheme } = useTheme();
+
+    return (
+        <motion.button
+            onClick={toggleTheme}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.92 }}
+            title={isDark ? "Chuyển sang Light Mode" : "Chuyển sang Dark Mode"}
+            className={`
+                relative flex items-center gap-2.5 transition-all duration-300 font-bold text-sm
+                ${compact
+                    ? "p-2.5 rounded-xl"
+                    : "w-full px-4 py-3 rounded-xl"
+                }
+                ${isDark
+                    ? "bg-slate-700/60 text-yellow-300 hover:bg-slate-600/80"
+                    : "bg-gray-100 text-slate-600 hover:bg-gray-200"
+                }
+            `}
+        >
+            {/* Track pill (chỉ hiện khi không compact) */}
+            <div className={`relative ${compact ? "" : "flex items-center gap-3 w-full"}`}>
+                <div className="relative w-5 h-5 shrink-0">
+                    <motion.div
+                        initial={false}
+                        animate={{ opacity: isDark ? 0 : 1, rotate: isDark ? -90 : 0, scale: isDark ? 0.5 : 1 }}
+                        transition={{ duration: 0.3 }}
+                        className="absolute inset-0 flex items-center justify-center"
+                    >
+                        <Sun size={18} className="text-amber-500" />
+                    </motion.div>
+                    <motion.div
+                        initial={false}
+                        animate={{ opacity: isDark ? 1 : 0, rotate: isDark ? 0 : 90, scale: isDark ? 1 : 0.5 }}
+                        transition={{ duration: 0.3 }}
+                        className="absolute inset-0 flex items-center justify-center"
+                    >
+                        <Moon size={18} className="text-indigo-300" />
+                    </motion.div>
+                </div>
+                {!compact && (
+                    <span>{isDark ? "Dark Mode" : "Light Mode"}</span>
+                )}
+            </div>
+        </motion.button>
+    );
+}
 
 export default function Layout() {
     const location = useLocation();
@@ -56,7 +109,7 @@ export default function Layout() {
                             to={item.path}
                             className={`flex items-center px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 ${
                                 isActive
-                                    ? "bg-primary text-white shadow-soft"
+                                    ? "bg-primary text-white shadow-soft dark:bg-slate-700 dark:text-white"
                                     : "text-muted hover:bg-gray-100 hover:text-primary"
                             }`}
                         >
@@ -67,7 +120,10 @@ export default function Layout() {
                 })}
             </nav>
 
-            <div className="p-4 border-t border-gray-200 bg-white">
+            <div className="p-4 border-t border-gray-200 bg-white space-y-2">
+                {/* Nút Dark/Light Mode */}
+                <ThemeToggleButton />
+
                 <button
                     onClick={handleLogout}
                     className="flex items-center w-full px-4 py-3 text-sm font-bold text-red-600 rounded-xl hover:bg-red-50 transition-colors"
@@ -125,12 +181,16 @@ export default function Layout() {
                 {/* Header cho Mobile (Chỉ hiện trên màn hình nhỏ) */}
                 <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:hidden shrink-0 z-50">
                     <h1 className="text-xl font-black tracking-tighter text-primary uppercase">STYLO.</h1>
-                    <button 
-                        onClick={() => setIsMobileMenuOpen(true)}
-                        className="p-2.5 text-primary hover:bg-gray-100 rounded-xl transition-colors"
-                    >
-                        <Menu className="w-6 h-6" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {/* Nút Dark Mode compact ở mobile header */}
+                        <ThemeToggleButton compact />
+                        <button 
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="p-2.5 text-primary hover:bg-gray-100 rounded-xl transition-colors"
+                        >
+                            <Menu className="w-6 h-6" />
+                        </button>
+                    </div>
                 </header>
 
                 {/* Nơi render nội dung của từng trang */}

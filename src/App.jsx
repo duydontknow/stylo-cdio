@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./contexts/ProtectedRoute";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { Toaster } from "react-hot-toast";
 import { Loader2 } from "lucide-react";
 
@@ -30,6 +31,7 @@ const PageLoader = () => (
 
 function App() {
     return (
+        <ThemeProvider>
         <AuthProvider>
             <Toaster position="top-right" reverseOrder={false} />
 
@@ -104,6 +106,7 @@ function App() {
                 </Routes>
             </Router>
         </AuthProvider>
+        </ThemeProvider>
     );
 }
 
